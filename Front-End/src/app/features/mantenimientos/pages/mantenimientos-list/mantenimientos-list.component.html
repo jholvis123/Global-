@@ -1,0 +1,221 @@
+<div class="page-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="page-header__content">
+      <div class="page-header__icon">
+        <mat-icon>build</mat-icon>
+      </div>
+      <div>
+        <h1 class="page-header__title">Mantenimientos</h1>
+        <p class="page-header__subtitle">Gestión de mantenimientos de vehículos</p>
+      </div>
+    </div>
+    <div class="page-header__actions">
+      <button mat-stroked-button [matMenuTriggerFor]="exportMenu">
+        <mat-icon>download</mat-icon>
+        Exportar
+      </button>
+      <mat-menu #exportMenu="matMenu">
+        <button mat-menu-item (click)="exportToExcel()">
+          <mat-icon>table_chart</mat-icon>
+          Exportar a Excel
+        </button>
+        <button mat-menu-item (click)="exportToPDF()">
+          <mat-icon>picture_as_pdf</mat-icon>
+          Exportar a PDF
+        </button>
+      </mat-menu>
+      <button mat-flat-button color="primary" (click)="nuevoMantenimiento()">
+        <mat-icon>add</mat-icon>
+        Nuevo Mantenimiento
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="stats-grid">
+    <div class="stat-card scheduled">
+      <div class="stat-card__icon">
+        <mat-icon>event</mat-icon>
+      </div>
+      <div class="stat-card__content">
+        <span class="stat-card__value">{{ stats.programados }}</span>
+        <span class="stat-card__label">Programados</span>
+      </div>
+    </div>
+    <div class="stat-card process">
+      <div class="stat-card__icon">
+        <mat-icon>autorenew</mat-icon>
+      </div>
+      <div class="stat-card__content">
+        <span class="stat-card__value">{{ stats.enProceso }}</span>
+        <span class="stat-card__label">En Proceso</span>
+      </div>
+    </div>
+    <div class="stat-card completed">
+      <div class="stat-card__icon">
+        <mat-icon>check_circle</mat-icon>
+      </div>
+      <div class="stat-card__content">
+        <span class="stat-card__value">{{ stats.completados }}</span>
+        <span class="stat-card__label">Completados</span>
+      </div>
+    </div>
+    <div class="stat-card overdue">
+      <div class="stat-card__icon">
+        <mat-icon>warning</mat-icon>
+      </div>
+      <div class="stat-card__content">
+        <span class="stat-card__value">{{ stats.vencidos }}</span>
+        <span class="stat-card__label">Vencidos</span>
+      </div>
+    </div>
+    <div class="stat-card cost">
+      <div class="stat-card__icon">
+        <mat-icon>payments</mat-icon>
+      </div>
+      <div class="stat-card__content">
+        <span class="stat-card__value">S/. {{ stats.costoMensual | number:'1.0-0' }}</span>
+        <span class="stat-card__label">Costo Mensual</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-card">
+    <div class="filters-row">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Buscar mantenimiento</mat-label>
+        <mat-icon matPrefix>search</mat-icon>
+        <input matInput [(ngModel)]="searchText" (input)="applyFilter()" placeholder="Placa, modelo, descripción...">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Tipo</mat-label>
+        <mat-select [(ngModel)]="filtroTipo" (selectionChange)="applyFilter()">
+          <mat-option value="">Todos</mat-option>
+          <mat-option *ngFor="let tipo of tipos" [value]="tipo">{{ tipo }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Estado</mat-label>
+        <mat-select [(ngModel)]="filtroEstado" (selectionChange)="applyFilter()">
+          <mat-option value="">Todos</mat-option>
+          <mat-option *ngFor="let estado of estados" [value]="estado">{{ getEstadoLabel(estado) }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Prioridad</mat-label>
+        <mat-select [(ngModel)]="filtroPrioridad" (selectionChange)="applyFilter()">
+          <mat-option value="">Todas</mat-option>
+          <mat-option *ngFor="let prioridad of prioridades" [value]="prioridad">{{ getPrioridadLabel(prioridad) }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <button mat-icon-button matTooltip="Limpiar filtros" (click)="clearFilters()">
+        <mat-icon>filter_alt_off</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-card">
+    <table mat-table [dataSource]="dataSource" matSort class="data-table">
+      <!-- Vehículo Column -->
+      <ng-container matColumnDef="vehiculo">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Vehículo</th>
+        <td mat-cell *matCellDef="let element">
+          <div class="vehicle-info">
+            <span class="vehicle-plate">{{ element.vehiculo.placa }}</span>
+            <span class="vehicle-model">{{ element.vehiculo.modelo }}</span>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Tipo Column -->
+      <ng-container matColumnDef="tipo">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Tipo</th>
+        <td mat-cell *matCellDef="let element">
+          <span class="tipo-badge" [ngClass]="element.tipo.toLowerCase()">
+            {{ element.tipo }}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Fecha Programada Column -->
+      <ng-container matColumnDef="fechaProgramada">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha Programada</th>
+        <td mat-cell *matCellDef="let element">
+          {{ element.fechaProgramada | date:'dd/MM/yyyy' }}
+        </td>
+      </ng-container>
+
+      <!-- Kilometraje Column -->
+      <ng-container matColumnDef="kilometraje">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Kilometraje</th>
+        <td mat-cell *matCellDef="let element">
+          {{ element.kilometraje | number }} km
+        </td>
+      </ng-container>
+
+      <!-- Costo Column -->
+      <ng-container matColumnDef="costo">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Costo</th>
+        <td mat-cell *matCellDef="let element">
+          <span class="cost-value">S/. {{ element.costo | number:'1.2-2' }}</span>
+        </td>
+      </ng-container>
+
+      <!-- Prioridad Column -->
+      <ng-container matColumnDef="prioridad">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Prioridad</th>
+        <td mat-cell *matCellDef="let element">
+          <span class="priority-badge" [ngClass]="getPrioridadClass(element.prioridad)">
+            {{ getPrioridadLabel(element.prioridad) }}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Estado Column -->
+      <ng-container matColumnDef="estado">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Estado</th>
+        <td mat-cell *matCellDef="let element">
+          <span class="status-badge" [ngClass]="getEstadoClass(element.estado)">
+            {{ getEstadoLabel(element.estado) }}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Acciones Column -->
+      <ng-container matColumnDef="acciones">
+        <th mat-header-cell *matHeaderCellDef>Acciones</th>
+        <td mat-cell *matCellDef="let element">
+          <button mat-icon-button matTooltip="Ver detalle" (click)="verDetalle(element)">
+            <mat-icon>visibility</mat-icon>
+          </button>
+          <button mat-icon-button matTooltip="Editar" (click)="editarMantenimiento(element)">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button matTooltip="Eliminar" color="warn" (click)="eliminarMantenimiento(element)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+      <!-- Empty State -->
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell empty-state" [attr.colspan]="displayedColumns.length">
+          <mat-icon>build_circle</mat-icon>
+          <p>No se encontraron mantenimientos</p>
+        </td>
+      </tr>
+    </table>
+
+    <mat-paginator [pageSizeOptions]="[10, 25, 50]" showFirstLastButtons></mat-paginator>
+  </div>
+</div>

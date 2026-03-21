@@ -1,0 +1,193 @@
+<div class="page-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="page-header__content">
+      <h1 class="page-header__title">Dashboard</h1>
+      <p class="page-header__subtitle">Bienvenido de vuelta. Aqui tienes el resumen de hoy.</p>
+    </div>
+    <div class="page-header__actions">
+      <button mat-stroked-button>
+        <mat-icon>calendar_today</mat-icon>
+        Ultimo mes
+      </button>
+      <button mat-flat-button color="primary">
+        <mat-icon>refresh</mat-icon>
+        Actualizar
+      </button>
+    </div>
+  </div>
+
+  <!-- KPIs Row -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--primary">
+          <mat-icon>route</mat-icon>
+        </div>
+        <div class="stat-card__content">
+          <span class="stat-card__value">{{ stats?.total_viajes || 0 }}</span>
+          <span class="stat-card__label">Viajes del Mes</span>
+          <div class="stat-card__trend stat-card__trend--up">
+            <mat-icon>trending_up</mat-icon>
+            <span>12% vs mes anterior</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--success">
+          <mat-icon>local_shipping</mat-icon>
+        </div>
+        <div class="stat-card__content">
+          <span class="stat-card__value">{{ stats?.viajes_en_ruta || 0 }}</span>
+          <span class="stat-card__label">Viajes en Ruta</span>
+          <span class="stat-card__meta">Activos ahora</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--info">
+          <mat-icon>trending_up</mat-icon>
+        </div>
+        <div class="stat-card__content">
+          <span class="stat-card__value">{{ (stats?.ingresos_mes || 0) | currency:'PEN':'S/ ':'1.0-0' }}</span>
+          <span class="stat-card__label">Ingresos del Mes</span>
+          <div class="stat-card__trend stat-card__trend--up">
+            <mat-icon>trending_up</mat-icon>
+            <span>8.5% vs mes anterior</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--warning">
+          <mat-icon>account_balance_wallet</mat-icon>
+        </div>
+        <div class="stat-card__content">
+          <span class="stat-card__value">{{ (stats?.ganancia_mes || 0) | currency:'PEN':'S/ ':'1.0-0' }}</span>
+          <span class="stat-card__label">Ganancia Neta</span>
+          <span class="stat-card__meta">Rentabilidad: {{ stats?.rentabilidad || 0 }}%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Row -->
+  <div class="charts-grid">
+    <mat-card class="chart-card chart-card--main">
+      <mat-card-header>
+        <mat-card-title>Ingresos vs Gastos</mat-card-title>
+        <mat-card-subtitle>Ultimos 6 meses</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="chart-container">
+          <canvas baseChart
+            [data]="lineChartData"
+            [options]="lineChartOptions"
+            [type]="'line'">
+          </canvas>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="chart-card">
+      <mat-card-header>
+        <mat-card-title>Viajes por Estado</mat-card-title>
+        <mat-card-subtitle>Distribucion actual</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="chart-container chart-container--donut">
+          <canvas baseChart
+            [data]="pieChartData"
+            [options]="pieChartOptions"
+            [type]="'doughnut'">
+          </canvas>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Widgets Row -->
+  <div class="widgets-grid">
+    <mat-card class="widget-card">
+      <mat-card-header>
+        <div class="widget-header">
+          <div class="widget-title">
+            <mat-icon>directions_bus</mat-icon>
+            <span>Viajes Recientes</span>
+          </div>
+          <button mat-button color="primary" routerLink="/app/viajes">
+            Ver todos <mat-icon>arrow_forward</mat-icon>
+          </button>
+        </div>
+      </mat-card-header>
+      <mat-card-content class="p-0">
+        <app-recent-trips [trips]="recentTrips"></app-recent-trips>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="widget-card">
+      <mat-card-header>
+        <div class="widget-header">
+          <div class="widget-title widget-title--warning">
+            <mat-icon>warning_amber</mat-icon>
+            <span>Alertas y Vencimientos</span>
+          </div>
+          <span class="alert-badge" *ngIf="alerts && alerts.length">{{ alerts.length }}</span>
+        </div>
+      </mat-card-header>
+      <mat-card-content class="p-0">
+        <app-alerts-widget [alerts]="alerts"></app-alerts-widget>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Quick Stats Row -->
+  <div class="quick-stats-grid">
+    <div class="quick-stat">
+      <div class="quick-stat__icon quick-stat__icon--primary">
+        <mat-icon>local_shipping</mat-icon>
+      </div>
+      <div class="quick-stat__info">
+        <span class="quick-stat__value">{{ stats?.vehiculos_activos || 0 }}</span>
+        <span class="quick-stat__label">Vehiculos Activos</span>
+      </div>
+    </div>
+
+    <div class="quick-stat">
+      <div class="quick-stat__icon quick-stat__icon--accent">
+        <mat-icon>badge</mat-icon>
+      </div>
+      <div class="quick-stat__info">
+        <span class="quick-stat__value">{{ stats?.choferes_activos || 0 }}</span>
+        <span class="quick-stat__label">Choferes Activos</span>
+      </div>
+    </div>
+
+    <div class="quick-stat" [class.quick-stat--warning]="(stats?.documentos_por_vencer || 0) > 0">
+      <div class="quick-stat__icon" [class.quick-stat__icon--warning]="(stats?.documentos_por_vencer || 0) > 0">
+        <mat-icon>description</mat-icon>
+      </div>
+      <div class="quick-stat__info">
+        <span class="quick-stat__value">{{ stats?.documentos_por_vencer || 0 }}</span>
+        <span class="quick-stat__label">Documentos por Vencer</span>
+      </div>
+    </div>
+
+    <div class="quick-stat" [class.quick-stat--warning]="(stats?.licencias_por_vencer || 0) > 0">
+      <div class="quick-stat__icon" [class.quick-stat__icon--warning]="(stats?.licencias_por_vencer || 0) > 0">
+        <mat-icon>card_membership</mat-icon>
+      </div>
+      <div class="quick-stat__info">
+        <span class="quick-stat__value">{{ stats?.licencias_por_vencer || 0 }}</span>
+        <span class="quick-stat__label">Licencias por Vencer</span>
+      </div>
+    </div>
+  </div>
+</div>

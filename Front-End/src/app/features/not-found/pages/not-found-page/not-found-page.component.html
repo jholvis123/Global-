@@ -1,0 +1,59 @@
+<div class="not-found">
+  <div class="not-found__background">
+    <div class="shape shape--1"></div>
+    <div class="shape shape--2"></div>
+    <div class="shape shape--3"></div>
+  </div>
+
+  <div class="not-found__content">
+    <div class="not-found__illustration">
+      <div class="error-code">
+        <span class="digit">4</span>
+        <div class="truck-container">
+          <mat-icon class="truck">local_shipping</mat-icon>
+          <div class="wheels">
+            <span class="wheel"></span>
+            <span class="wheel"></span>
+          </div>
+        </div>
+        <span class="digit">4</span>
+      </div>
+    </div>
+
+    <h1 class="not-found__title">¡Ups! Página no encontrada</h1>
+    
+    <p class="not-found__message">
+      Parece que este camión se perdió en el camino. 
+      La página que buscas no existe o fue movida.
+    </p>
+
+    <div class="not-found__actions">
+      <button class="btn btn--primary" (click)="goHome()">
+        <mat-icon>home</mat-icon>
+        Ir al Inicio
+      </button>
+      <button class="btn btn--secondary" (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon>
+        Volver Atrás
+      </button>
+    </div>
+
+    <div class="not-found__suggestions">
+      <p>¿Necesitas ayuda? Prueba estas opciones:</p>
+      <div class="suggestions">
+        <a routerLink="/" class="suggestion">
+          <mat-icon>language</mat-icon>
+          <span>Página Principal</span>
+        </a>
+        <a routerLink="/auth/login" class="suggestion">
+          <mat-icon>login</mat-icon>
+          <span>Iniciar Sesión</span>
+        </a>
+        <a routerLink="/" fragment="contact" class="suggestion">
+          <mat-icon>support_agent</mat-icon>
+          <span>Contactar Soporte</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

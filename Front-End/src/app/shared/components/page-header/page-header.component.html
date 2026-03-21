@@ -1,0 +1,17 @@
+<div class="page-header">
+  <div class="header-content">
+    <div class="header-title">
+      <button mat-icon-button *ngIf="showBack" (click)="onBack.emit()" class="back-button">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div class="title-wrapper">
+        <h1>{{ title }}</h1>
+        <p *ngIf="subtitle" class="subtitle">{{ subtitle }}</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <ng-content></ng-content>
+    </div>
+  </div>
+  <mat-divider *ngIf="showDivider"></mat-divider>
+</div>

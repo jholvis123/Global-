@@ -1,0 +1,152 @@
+<app-page-header 
+  [title]="isEditing ? 'Editar Chofer' : 'Nuevo Chofer'" 
+  [subtitle]="isEditing ? 'Modificar informacion del chofer' : 'Registrar un nuevo chofer'"
+  [showBack]="true"
+  (onBack)="goBack()">
+</app-page-header>
+
+<form [formGroup]="choferForm" (ngSubmit)="onSubmit()">
+  <div class="form-grid">
+    <!-- Datos Personales -->
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title><mat-icon>person</mat-icon> Datos Personales</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Nombre</mat-label>
+            <input matInput formControlName="nombre">
+            <mat-error>El nombre es requerido</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Apellido</mat-label>
+            <input matInput formControlName="apellido">
+            <mat-error>El apellido es requerido</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Cedula de Identidad</mat-label>
+            <input matInput formControlName="ci">
+            <mat-error>El CI es requerido</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Telefono</mat-label>
+            <input matInput formControlName="telefono">
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Fecha de Nacimiento</mat-label>
+            <input matInput [matDatepicker]="pickerNacimiento" formControlName="fecha_nacimiento">
+            <mat-datepicker-toggle matSuffix [for]="pickerNacimiento"></mat-datepicker-toggle>
+            <mat-datepicker #pickerNacimiento></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Direccion</mat-label>
+            <input matInput formControlName="direccion">
+          </mat-form-field>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Licencia de Conducir -->
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title><mat-icon>badge</mat-icon> Licencia de Conducir</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Numero de Licencia</mat-label>
+            <input matInput formControlName="licencia_numero">
+            <mat-error>El numero de licencia es requerido</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Categoria</mat-label>
+            <mat-select formControlName="licencia_categoria">
+              <mat-option *ngFor="let cat of categoriasLicencia" [value]="cat.value">
+                {{ cat.label }}
+              </mat-option>
+            </mat-select>
+            <mat-error>La categoria es requerida</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Fecha de Vencimiento</mat-label>
+            <input matInput [matDatepicker]="pickerLicencia" formControlName="licencia_vencimiento">
+            <mat-datepicker-toggle matSuffix [for]="pickerLicencia"></mat-datepicker-toggle>
+            <mat-datepicker #pickerLicencia></mat-datepicker>
+            <mat-error>La fecha de vencimiento es requerida</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Anos de Experiencia</mat-label>
+            <input matInput type="number" formControlName="experiencia_anos">
+            <mat-error>Ingrese un valor valido</mat-error>
+          </mat-form-field>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Estado -->
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title><mat-icon>settings</mat-icon> Estado y Observaciones</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Estado</mat-label>
+          <mat-select formControlName="estado">
+            <mat-option value="ACTIVO">Activo</mat-option>
+            <mat-option value="EN_VIAJE">En Viaje</mat-option>
+            <mat-option value="DESCANSO">Descanso</mat-option>
+            <mat-option value="INACTIVO">Inactivo</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Observaciones</mat-label>
+          <textarea matInput formControlName="observaciones" rows="3"></textarea>
+        </mat-form-field>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Contacto de Emergencia -->
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title><mat-icon>emergency</mat-icon> Contacto de Emergencia</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Nombre de Contacto</mat-label>
+            <input matInput formControlName="contacto_emergencia_nombre">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Telefono de Emergencia</mat-label>
+            <input matInput formControlName="contacto_emergencia_telefono">
+          </mat-form-field>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div class="form-actions">
+    <button mat-button type="button" (click)="goBack()">Cancelar</button>
+    <button mat-raised-button color="primary" type="submit" [disabled]="choferForm.invalid || isSubmitting">
+      <mat-spinner *ngIf="isSubmitting" diameter="20"></mat-spinner>
+      <span *ngIf="!isSubmitting">{{ isEditing ? 'Guardar Cambios' : 'Crear Chofer' }}</span>
+    </button>
+  </div>
+</form>

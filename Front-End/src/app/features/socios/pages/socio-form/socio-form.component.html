@@ -1,0 +1,151 @@
+<app-page-header 
+  [title]="isEditing ? 'Editar Socio' : 'Nuevo Socio'" 
+  [subtitle]="isEditing ? 'Modificar informacion del socio' : 'Registrar un nuevo socio'"
+  [showBack]="true"
+  (onBack)="goBack()">
+</app-page-header>
+
+<form [formGroup]="socioForm" (ngSubmit)="onSubmit()">
+  <div class="form-grid">
+    <!-- Datos Personales -->
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title><mat-icon>person</mat-icon> Datos Personales</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Nombre</mat-label>
+            <input matInput formControlName="nombre">
+            <mat-error>El nombre es requerido</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Apellido</mat-label>
+            <input matInput formControlName="apellido">
+            <mat-error>El apellido es requerido</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Cedula de Identidad</mat-label>
+            <input matInput formControlName="ci">
+            <mat-error>El CI es requerido</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Telefono</mat-label>
+            <input matInput formControlName="telefono">
+            <mat-error>El telefono es requerido</mat-error>
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Direccion</mat-label>
+          <input matInput formControlName="direccion">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Correo Electronico</mat-label>
+          <input matInput type="email" formControlName="email">
+          <mat-error *ngIf="socioForm.get('email')?.hasError('email')">
+            Ingrese un correo valido
+          </mat-error>
+        </mat-form-field>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Configuracion Financiera -->
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title><mat-icon>payments</mat-icon> Configuracion Financiera</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Porcentaje de Ganancia</mat-label>
+          <input matInput type="number" formControlName="porcentaje_ganancia">
+          <span matSuffix>%</span>
+          <mat-hint>Porcentaje que recibe el socio por cada viaje</mat-hint>
+          <mat-error>El porcentaje debe estar entre 0 y 100</mat-error>
+        </mat-form-field>
+
+        <div class="percentage-preview">
+          <div class="preview-item">
+            <span class="label">Socio recibe:</span>
+            <span class="value primary">{{ socioForm.get('porcentaje_ganancia')?.value || 0 }}%</span>
+          </div>
+          <div class="preview-item">
+            <span class="label">Empresa retiene:</span>
+            <span class="value accent">{{ 100 - (socioForm.get('porcentaje_ganancia')?.value || 0) }}%</span>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <mat-form-field appearance="outline" class="full-width" style="margin-top: 16px;">
+          <mat-label>Banco</mat-label>
+          <mat-select formControlName="banco">
+            <mat-option value="">Sin cuenta bancaria</mat-option>
+            <mat-option value="BNB">Banco Nacional de Bolivia</mat-option>
+            <mat-option value="BUN">Banco Union</mat-option>
+            <mat-option value="BME">Banco Mercantil Santa Cruz</mat-option>
+            <mat-option value="BIS">Banco BISA</mat-option>
+            <mat-option value="BEC">Banco Economico</mat-option>
+            <mat-option value="BGA">Banco Ganadero</mat-option>
+            <mat-option value="BSO">Banco Solidario</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Numero de Cuenta</mat-label>
+          <input matInput formControlName="cuenta_bancaria">
+        </mat-form-field>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Estado -->
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title><mat-icon>settings</mat-icon> Estado</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Estado</mat-label>
+          <mat-select formControlName="estado">
+            <mat-option value="ACTIVO">Activo</mat-option>
+            <mat-option value="INACTIVO">Inactivo</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Fecha de Ingreso</mat-label>
+          <input matInput [matDatepicker]="pickerIngreso" formControlName="fecha_ingreso">
+          <mat-datepicker-toggle matSuffix [for]="pickerIngreso"></mat-datepicker-toggle>
+          <mat-datepicker #pickerIngreso></mat-datepicker>
+        </mat-form-field>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Observaciones -->
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title><mat-icon>notes</mat-icon> Observaciones</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Observaciones</mat-label>
+          <textarea matInput formControlName="observaciones" rows="4"></textarea>
+        </mat-form-field>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div class="form-actions">
+    <button mat-button type="button" (click)="goBack()">Cancelar</button>
+    <button mat-raised-button color="primary" type="submit" [disabled]="socioForm.invalid || isSubmitting">
+      <mat-spinner *ngIf="isSubmitting" diameter="20"></mat-spinner>
+      <span *ngIf="!isSubmitting">{{ isEditing ? 'Guardar Cambios' : 'Crear Socio' }}</span>
+    </button>
+  </div>
+</form>

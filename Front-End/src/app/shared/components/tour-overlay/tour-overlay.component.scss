@@ -1,0 +1,182 @@
+.tour-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10000;
+  pointer-events: none;
+}
+
+.tour-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  pointer-events: auto;
+}
+
+.tour-highlight {
+  position: fixed;
+  background: transparent;
+  border-radius: 8px;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  transition: all 0.3s ease;
+  z-index: 10001;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    border: 2px solid #3b82f6;
+    border-radius: 12px;
+    animation: pulse 2s infinite;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.02);
+  }
+}
+
+.tour-tooltip {
+  position: fixed;
+  width: 320px;
+  background: var(--card-bg, white);
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  pointer-events: auto;
+  z-index: 10002;
+  overflow: hidden;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tooltip-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px 0;
+
+  .step-indicator {
+    font-size: 12px;
+    font-weight: 600;
+    color: #3b82f6;
+    background: rgba(59, 130, 246, 0.1);
+    padding: 4px 12px;
+    border-radius: 20px;
+  }
+
+  .close-btn {
+    background: none;
+    border: none;
+    padding: 4px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.05);
+      color: var(--text-primary);
+    }
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+}
+
+.tooltip-content {
+  padding: 16px 20px;
+
+  .tooltip-title {
+    margin: 0 0 8px;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .tooltip-text {
+    margin: 0;
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+}
+
+.tooltip-progress {
+  height: 3px;
+  background: rgba(59, 130, 246, 0.1);
+  margin: 0 20px;
+
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+  }
+}
+
+.tooltip-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-top: 1px solid var(--border-color);
+  margin-top: 12px;
+
+  .skip-btn {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  .nav-buttons {
+    display: flex;
+    gap: 8px;
+
+    button {
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        margin: 0 -4px;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .tour-tooltip {
+    width: calc(100vw - 40px);
+    left: 20px !important;
+    right: 20px;
+  }
+}

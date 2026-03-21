@@ -1,0 +1,225 @@
+<div class="page-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="page-header__content">
+      <div class="page-header__icon page-header__icon--clientes">
+        <mat-icon>store</mat-icon>
+      </div>
+      <div>
+        <h1 class="page-header__title">Clientes</h1>
+        <p class="page-header__subtitle">Empresas y contactos comerciales</p>
+      </div>
+    </div>
+    <div class="page-header__actions">
+      <button mat-stroked-button class="btn-export">
+        <mat-icon>file_download</mat-icon>
+        Exportar
+      </button>
+      <button mat-flat-button color="primary" routerLink="nuevo" class="btn-new">
+        <mat-icon>add_business</mat-icon>
+        Nuevo Cliente
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="stats-grid">
+    <div class="stat-card stat-card--primary">
+      <div class="stat-card__icon">
+        <mat-icon>corporate_fare</mat-icon>
+      </div>
+      <div class="stat-card__content">
+        <span class="stat-card__value">{{ stats.total }}</span>
+        <span class="stat-card__label">Total Clientes</span>
+      </div>
+      <div class="stat-card__decoration"></div>
+    </div>
+    <div class="stat-card stat-card--success">
+      <div class="stat-card__icon">
+        <mat-icon>verified</mat-icon>
+      </div>
+      <div class="stat-card__content">
+        <span class="stat-card__value">{{ stats.activos }}</span>
+        <span class="stat-card__label">Activos</span>
+      </div>
+      <div class="stat-card__decoration"></div>
+    </div>
+    <div class="stat-card stat-card--info">
+      <div class="stat-card__icon">
+        <mat-icon>local_shipping</mat-icon>
+      </div>
+      <div class="stat-card__content">
+        <span class="stat-card__value">{{ stats.viajesActivos || 0 }}</span>
+        <span class="stat-card__label">Viajes Activos</span>
+      </div>
+      <div class="stat-card__decoration"></div>
+    </div>
+    <div class="stat-card stat-card--accent">
+      <div class="stat-card__icon">
+        <mat-icon>star</mat-icon>
+      </div>
+      <div class="stat-card__content">
+        <span class="stat-card__value">{{ stats.frecuentes || 0 }}</span>
+        <span class="stat-card__label">Frecuentes</span>
+      </div>
+      <div class="stat-card__decoration"></div>
+    </div>
+  </div>
+
+  <!-- Filtros Modernos -->
+  <div class="filters-container">
+    <div class="search-box">
+      <mat-icon class="search-icon">search</mat-icon>
+      <input type="text" (keyup)="applyFilter($event)" placeholder="Buscar por razón social, NIT o contacto...">
+    </div>
+    
+    <div class="filter-chips">
+      <button class="filter-chip" [class.active]="selectedEstado === ''" (click)="selectedEstado = ''; filterByEstado()">
+        <mat-icon>business</mat-icon>
+        Todos
+      </button>
+      <button class="filter-chip" [class.active]="selectedEstado === 'ACTIVO'" (click)="selectedEstado = 'ACTIVO'; filterByEstado()">
+        <mat-icon>verified</mat-icon>
+        Activos
+      </button>
+      <button class="filter-chip" [class.active]="selectedEstado === 'INACTIVO'" (click)="selectedEstado = 'INACTIVO'; filterByEstado()">
+        <mat-icon>block</mat-icon>
+        Inactivos
+      </button>
+    </div>
+
+    <button mat-icon-button class="btn-clear" *ngIf="selectedEstado" (click)="clearFilters()" matTooltip="Limpiar filtros">
+      <mat-icon>filter_alt_off</mat-icon>
+    </button>
+  </div>
+
+  <!-- Tabla -->
+  <div class="table-wrapper">
+    <div class="table-container" *ngIf="dataSource.data.length > 0; else emptyState">
+      <table mat-table [dataSource]="dataSource" matSort>
+        <ng-container matColumnDef="razon_social">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Empresa </th>
+          <td mat-cell *matCellDef="let cliente">
+            <div class="company-cell">
+              <div class="company-avatar">
+                <mat-icon>domain</mat-icon>
+              </div>
+              <div class="company-info">
+                <span class="company-name">{{ cliente.razon_social }}</span>
+                <span class="company-nit" *ngIf="cliente.nit">NIT: {{ cliente.nit }}</span>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="nit">
+          <th mat-header-cell *matHeaderCellDef> Contacto </th>
+          <td mat-cell *matCellDef="let cliente">
+            <div class="contact-cell" *ngIf="cliente.contacto_nombre; else noContact">
+              <div class="contact-avatar">
+                {{ getContactInitials(cliente.contacto_nombre) }}
+              </div>
+              <div class="contact-info">
+                <span class="contact-name">{{ cliente.contacto_nombre }}</span>
+                <span class="contact-phone">{{ cliente.contacto_telefono || 'Sin teléfono' }}</span>
+              </div>
+            </div>
+            <ng-template #noContact>
+              <span class="no-data">Sin contacto</span>
+            </ng-template>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="contacto">
+          <th mat-header-cell *matHeaderCellDef> Email </th>
+          <td mat-cell *matCellDef="let cliente">
+            <div class="email-cell" *ngIf="cliente.contacto_email; else noEmail">
+              <mat-icon>mail_outline</mat-icon>
+              <span>{{ cliente.contacto_email }}</span>
+            </div>
+            <ng-template #noEmail>
+              <span class="no-data">Sin email</span>
+            </ng-template>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="email">
+          <th mat-header-cell *matHeaderCellDef> Ubicación </th>
+          <td mat-cell *matCellDef="let cliente">
+            <div class="location-cell" *ngIf="cliente.direccion; else noLocation">
+              <mat-icon>location_on</mat-icon>
+              <span>{{ cliente.direccion | truncate:20 }}</span>
+            </div>
+            <ng-template #noLocation>
+              <span class="no-data">Sin dirección</span>
+            </ng-template>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="ciudad">
+          <th mat-header-cell *matHeaderCellDef> Viajes </th>
+          <td mat-cell *matCellDef="let cliente">
+            <div class="trips-badge">
+              <mat-icon>route</mat-icon>
+              <span>{{ cliente.viajes_count || 0 }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="estado">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Estado </th>
+          <td mat-cell *matCellDef="let cliente">
+            <span class="status-pill" [class]="'status-pill--' + cliente.estado?.toLowerCase()">
+              <mat-icon>{{ cliente.estado === 'ACTIVO' ? 'check_circle' : 'cancel' }}</mat-icon>
+              {{ cliente.estado === 'ACTIVO' ? 'Activo' : 'Inactivo' }}
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef> </th>
+          <td mat-cell *matCellDef="let cliente">
+            <button mat-icon-button class="action-menu-btn" [matMenuTriggerFor]="menu" (click)="$event.stopPropagation()">
+              <mat-icon>more_horiz</mat-icon>
+            </button>
+            <mat-menu #menu="matMenu" class="client-menu">
+              <button mat-menu-item [routerLink]="[cliente.id, 'editar']">
+                <mat-icon class="menu-icon-primary">edit_note</mat-icon>
+                <span>Editar cliente</span>
+              </button>
+              <button mat-menu-item>
+                <mat-icon class="menu-icon-info">history</mat-icon>
+                <span>Historial viajes</span>
+              </button>
+              <button mat-menu-item>
+                <mat-icon class="menu-icon-info">receipt_long</mat-icon>
+                <span>Facturación</span>
+              </button>
+              <mat-divider></mat-divider>
+              <button mat-menu-item class="menu-item-danger" (click)="deleteCliente(cliente)">
+                <mat-icon>delete_outline</mat-icon>
+                <span>Eliminar cliente</span>
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="clickable-row"></tr>
+      </table>
+
+      <mat-paginator [pageSizeOptions]="[10, 25, 50]" showFirstLastButtons></mat-paginator>
+    </div>
+
+    <ng-template #emptyState>
+      <app-empty-state
+        icon="storefront"
+        title="Sin clientes registrados"
+        message="Agrega tu primer cliente para empezar a gestionar tus operaciones"
+        actionText="Agregar Cliente"
+        actionIcon="add_business"
+        (action)="router.navigate(['/clientes/nuevo'])">
+      </app-empty-state>
+    </ng-template>
+  </div>
+</div>

@@ -1,0 +1,126 @@
+<header class="navbar">
+  <!-- Toggle Sidebar -->
+  <button class="nav-toggle" (click)="toggleSidebar.emit()">
+    <mat-icon>menu</mat-icon>
+  </button>
+
+  <!-- Breadcrumb / Page Title -->
+  <div class="navbar-title">
+    <span class="page-title">{{ pageTitle }}</span>
+  </div>
+
+  <div class="navbar-spacer"></div>
+
+  <!-- Global Search Component -->
+  <app-global-search></app-global-search>
+
+  <!-- Actions -->
+  <div class="navbar-actions">
+    <!-- Dark Mode Toggle -->
+    <button class="action-btn" 
+            (click)="toggleDarkMode()" 
+            [matTooltip]="isDarkMode ? 'Modo claro' : 'Modo oscuro'">
+      <mat-icon>{{ isDarkMode ? 'light_mode' : 'dark_mode' }}</mat-icon>
+    </button>
+
+    <!-- Notificaciones -->
+    <button class="action-btn" [matMenuTriggerFor]="notificationsMenu" aria-label="Notificaciones">
+      <mat-icon [matBadge]="unreadCount" 
+                [matBadgeHidden]="unreadCount === 0"
+                matBadgeColor="warn"
+                matBadgeSize="small"
+                aria-hidden="false">
+        notifications_none
+      </mat-icon>
+    </button>
+    <mat-menu #notificationsMenu="matMenu" class="notifications-dropdown">
+      <div class="dropdown-header" (click)="$event.stopPropagation()">
+        <span class="dropdown-title">
+          Notificaciones
+          <span class="badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+        </span>
+        <button mat-button color="primary" *ngIf="unreadCount > 0" (click)="markAllAsRead()">
+          Marcar todas leídas
+        </button>
+      </div>
+      <mat-divider></mat-divider>
+      
+      <!-- Lista de notificaciones -->
+      <div class="notifications-list" *ngIf="notifications.length > 0">
+        <div class="notification-item" 
+             *ngFor="let notification of notifications"
+             [class.unread]="!notification.read"
+             (click)="markAsRead(notification)">
+          <div class="notification-icon" [ngClass]="notification.type">
+            <mat-icon>{{ notification.icon }}</mat-icon>
+          </div>
+          <div class="notification-content">
+            <span class="notification-title">{{ notification.title }}</span>
+            <span class="notification-message">{{ notification.message }}</span>
+            <span class="notification-time">{{ notification.time }}</span>
+          </div>
+          <button class="notification-delete" (click)="deleteNotification(notification, $event)">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- Empty state -->
+      <div class="dropdown-empty" *ngIf="notifications.length === 0" (click)="$event.stopPropagation()">
+        <div class="empty-icon">
+          <mat-icon>notifications_off</mat-icon>
+        </div>
+        <span>No tienes notificaciones</span>
+      </div>
+
+      <mat-divider *ngIf="notifications.length > 0"></mat-divider>
+      <button mat-menu-item class="view-all-btn" *ngIf="notifications.length > 0">
+        <span>Ver todas las notificaciones</span>
+        <mat-icon>arrow_forward</mat-icon>
+      </button>
+    </mat-menu>
+
+    <!-- Ayuda -->
+    <button class="action-btn hide-mobile" matTooltip="Ayuda">
+      <mat-icon>help_outline</mat-icon>
+    </button>
+
+    <!-- User Menu -->
+    <button class="user-trigger" [matMenuTriggerFor]="userMenu">
+      <div class="user-avatar">
+        {{ getUserInitials() }}
+      </div>
+      <div class="user-info hide-mobile">
+        <span class="user-name">{{ currentUser?.nombre }}</span>
+        <span class="user-role">{{ getPrimaryRole() }}</span>
+      </div>
+      <mat-icon class="dropdown-arrow hide-mobile">keyboard_arrow_down</mat-icon>
+    </button>
+
+    <mat-menu #userMenu="matMenu" class="user-dropdown">
+      <div class="user-dropdown-header">
+        <div class="user-avatar user-avatar--lg">
+          {{ getUserInitials() }}
+        </div>
+        <div class="user-dropdown-info">
+          <strong>{{ currentUser?.nombre }} {{ currentUser?.apellido }}</strong>
+          <span>{{ currentUser?.email }}</span>
+        </div>
+      </div>
+      <mat-divider></mat-divider>
+      <button mat-menu-item routerLink="/app/perfil">
+        <mat-icon>person_outline</mat-icon>
+        <span>Mi Perfil</span>
+      </button>
+      <button mat-menu-item routerLink="/app/configuracion">
+        <mat-icon>settings</mat-icon>
+        <span>Configuración</span>
+      </button>
+      <mat-divider></mat-divider>
+      <button mat-menu-item class="logout-item" (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        <span>Cerrar Sesión</span>
+      </button>
+    </mat-menu>
+  </div>
+</header>

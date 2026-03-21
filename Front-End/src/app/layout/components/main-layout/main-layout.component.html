@@ -1,0 +1,27 @@
+<mat-sidenav-container class="sidenav-container">
+  <mat-sidenav #drawer class="sidenav" fixedInViewport
+      [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
+      [mode]="(isHandset$ | async) ? 'over' : 'side'"
+      [opened]="(isHandset$ | async) === false">
+    <app-sidebar (menuItemClick)="onMenuItemClick()"></app-sidebar>
+  </mat-sidenav>
+  
+  <mat-sidenav-content>
+    <app-navbar (toggleSidebar)="drawer.toggle()"></app-navbar>
+    
+    <mat-progress-bar 
+      *ngIf="loading$ | async" 
+      mode="indeterminate" 
+      class="top-loading-bar">
+    </mat-progress-bar>
+    
+    <main class="main-content">
+      <router-outlet></router-outlet>
+    </main>
+    
+    <app-footer></app-footer>
+  </mat-sidenav-content>
+</mat-sidenav-container>
+
+<!-- Tour Overlay -->
+<app-tour-overlay></app-tour-overlay>

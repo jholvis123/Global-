@@ -1,0 +1,166 @@
+<app-page-header 
+  [title]="isEditing ? 'Editar Vehiculo' : 'Nuevo Vehiculo'" 
+  [subtitle]="isEditing ? 'Modificar informacion del vehiculo' : 'Registrar un nuevo vehiculo'"
+  [showBack]="true"
+  (onBack)="goBack()">
+</app-page-header>
+
+<form [formGroup]="vehiculoForm" (ngSubmit)="onSubmit()">
+  <div class="form-grid">
+    <!-- Informacion del Vehiculo -->
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>local_shipping</mat-icon>
+          Informacion del Vehiculo
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Placa</mat-label>
+            <input matInput formControlName="placa" placeholder="ABC-123" style="text-transform: uppercase;">
+            <mat-error *ngIf="vehiculoForm.get('placa')?.hasError('required')">La placa es requerida</mat-error>
+            <mat-error *ngIf="vehiculoForm.get('placa')?.hasError('pattern')">Formato invalido</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Anio</mat-label>
+            <input matInput type="number" formControlName="anio" placeholder="2022">
+            <mat-error>El anio es requerido</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Marca</mat-label>
+            <mat-select formControlName="marca">
+              <mat-option *ngFor="let marca of marcasVehiculo" [value]="marca">
+                {{ marca }}
+              </mat-option>
+            </mat-select>
+            <mat-error>Seleccione una marca</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Modelo</mat-label>
+            <input matInput formControlName="modelo" placeholder="FH16">
+            <mat-error>El modelo es requerido</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Capacidad (Toneladas)</mat-label>
+            <input matInput type="number" formControlName="capacidad_ton" placeholder="30">
+            <mat-error>La capacidad es requerida</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Tipo de Combustible</mat-label>
+            <mat-select formControlName="tipo_combustible">
+              <mat-option *ngFor="let tipo of tiposCombustible" [value]="tipo.value">
+                {{ tipo.label }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Propietario -->
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>person</mat-icon>
+          Propietario / Socio
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Socio Propietario</mat-label>
+          <mat-select formControlName="socio_id">
+            <mat-option *ngFor="let socio of socios" [value]="socio.id">
+              {{ socio.nombre }} {{ socio.apellido }}
+            </mat-option>
+          </mat-select>
+          <mat-error>Seleccione un socio</mat-error>
+        </mat-form-field>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Documentacion -->
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>description</mat-icon>
+          Documentacion
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Numero de Motor</mat-label>
+            <input matInput formControlName="numero_motor">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Numero de Chasis</mat-label>
+            <input matInput formControlName="numero_chasis">
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Vencimiento SOAT</mat-label>
+            <input matInput [matDatepicker]="pickerSoat" formControlName="soat_vencimiento">
+            <mat-datepicker-toggle matSuffix [for]="pickerSoat"></mat-datepicker-toggle>
+            <mat-datepicker #pickerSoat></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Vencimiento Inspeccion Tecnica</mat-label>
+            <input matInput [matDatepicker]="pickerInspeccion" formControlName="inspeccion_vencimiento">
+            <mat-datepicker-toggle matSuffix [for]="pickerInspeccion"></mat-datepicker-toggle>
+            <mat-datepicker #pickerInspeccion></mat-datepicker>
+          </mat-form-field>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Estado -->
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>settings</mat-icon>
+          Estado
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Estado del Vehiculo</mat-label>
+          <mat-select formControlName="estado">
+            <mat-option value="ACTIVO">Activo</mat-option>
+            <mat-option value="EN_MANTENIMIENTO">En Mantenimiento</mat-option>
+            <mat-option value="INACTIVO">Inactivo</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Observaciones</mat-label>
+          <textarea matInput formControlName="observaciones" rows="3"></textarea>
+        </mat-form-field>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Acciones -->
+  <div class="form-actions">
+    <button mat-button type="button" (click)="goBack()">Cancelar</button>
+    <button mat-raised-button color="primary" type="submit" 
+            [disabled]="vehiculoForm.invalid || isSubmitting">
+      <mat-spinner *ngIf="isSubmitting" diameter="20"></mat-spinner>
+      <span *ngIf="!isSubmitting">{{ isEditing ? 'Guardar Cambios' : 'Crear Vehiculo' }}</span>
+    </button>
+  </div>
+</form>

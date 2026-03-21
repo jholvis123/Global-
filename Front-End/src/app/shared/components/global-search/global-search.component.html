@@ -1,0 +1,90 @@
+<!-- Search Trigger Button -->
+<button class="search-trigger" (click)="openSearch()" matTooltip="Buscar (Ctrl+K)">
+  <mat-icon>search</mat-icon>
+  <span class="search-placeholder">Buscar...</span>
+  <span class="search-shortcut">Ctrl+K</span>
+</button>
+
+<!-- Search Modal -->
+<div class="search-overlay" *ngIf="isOpen" (click)="onBackdropClick()">
+  <div class="search-modal" @slideDown (click)="$event.stopPropagation()">
+    <!-- Search Input -->
+    <div class="search-header">
+      <mat-icon class="search-icon">search</mat-icon>
+      <input 
+        #searchInput
+        type="text"
+        class="search-input"
+        placeholder="Buscar viajes, vehículos, choferes, clientes..."
+        [value]="searchTerm"
+        (input)="onSearchInput($event)"
+        autocomplete="off"
+      >
+      <button class="close-btn" (click)="closeSearch()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <!-- Loading State -->
+    <div class="search-loading" *ngIf="isLoading">
+      <mat-spinner diameter="24"></mat-spinner>
+      <span>Buscando...</span>
+    </div>
+
+    <!-- Results -->
+    <div class="search-results" *ngIf="!isLoading && results.length > 0">
+      <div 
+        class="result-item"
+        *ngFor="let result of results; let i = index"
+        [class.selected]="i === selectedIndex"
+        (click)="selectResult(result)"
+        (mouseenter)="selectedIndex = i"
+      >
+        <div class="result-icon" [style.background-color]="getTypeColor(result.type) + '20'" [style.color]="getTypeColor(result.type)">
+          <mat-icon>{{ result.icon }}</mat-icon>
+        </div>
+        <div class="result-content">
+          <span class="result-title">{{ result.title }}</span>
+          <span class="result-subtitle">{{ result.subtitle }}</span>
+        </div>
+        <span class="result-type" [style.background-color]="getTypeColor(result.type) + '15'" [style.color]="getTypeColor(result.type)">
+          {{ getTypeLabel(result.type) }}
+        </span>
+      </div>
+    </div>
+
+    <!-- No Results -->
+    <div class="search-empty" *ngIf="!isLoading && searchTerm.length >= 2 && results.length === 0">
+      <mat-icon>search_off</mat-icon>
+      <span>No se encontraron resultados para "{{ searchTerm }}"</span>
+    </div>
+
+    <!-- Initial State -->
+    <div class="search-initial" *ngIf="!isLoading && searchTerm.length < 2">
+      <div class="search-tips">
+        <span class="tip-title">Sugerencias de búsqueda:</span>
+        <ul>
+          <li>Busca por placa de vehículo (ej: ABC-123)</li>
+          <li>Nombre de chofer o cliente</li>
+          <li>Número de documento o RUC</li>
+          <li>Código de viaje, anticipo o liquidación</li>
+        </ul>
+      </div>
+      <div class="search-shortcuts">
+        <div class="shortcut">
+          <span class="key">↑</span>
+          <span class="key">↓</span>
+          <span>Navegar</span>
+        </div>
+        <div class="shortcut">
+          <span class="key">Enter</span>
+          <span>Seleccionar</span>
+        </div>
+        <div class="shortcut">
+          <span class="key">Esc</span>
+          <span>Cerrar</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

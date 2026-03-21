@@ -1,0 +1,71 @@
+<!-- Header con Logo -->
+<div class="sidebar-header">
+  <div class="logo-container">
+    <div class="logo-icon-wrapper">
+      <mat-icon class="logo-icon">local_shipping</mat-icon>
+    </div>
+    <div class="logo-text">
+      <span class="logo-title">Transporte</span>
+      <span class="logo-subtitle">SRL</span>
+    </div>
+  </div>
+</div>
+
+<!-- Menu de Navegacion -->
+<nav class="sidebar-nav">
+  <ul class="nav-list">
+    <ng-container *ngFor="let item of menuItems">
+      <ng-container *ngIf="hasAccess(item.roles)">
+        <!-- Item simple -->
+        <li class="nav-item" *ngIf="!item.children">
+          <a class="nav-link"
+             [routerLink]="item.route"
+             routerLinkActive="active"
+             (click)="onItemClick()">
+            <span class="nav-icon">
+              <mat-icon>{{ item.icon }}</mat-icon>
+            </span>
+            <span class="nav-label">{{ item.label }}</span>
+          </a>
+        </li>
+
+        <!-- Item con submenu -->
+        <li class="nav-item has-submenu" *ngIf="item.children">
+          <button class="nav-link" 
+                  (click)="toggleSubmenu(item)"
+                  [class.expanded]="item.expanded">
+            <span class="nav-icon">
+              <mat-icon>{{ item.icon }}</mat-icon>
+            </span>
+            <span class="nav-label">{{ item.label }}</span>
+            <mat-icon class="nav-arrow">{{ item.expanded ? 'expand_less' : 'expand_more' }}</mat-icon>
+          </button>
+          <ul class="nav-submenu" *ngIf="item.expanded" [@submenuAnimation]>
+            <li *ngFor="let child of item.children">
+              <a class="nav-link"
+                 [routerLink]="child.route"
+                 routerLinkActive="active"
+                 (click)="onItemClick()">
+                <span class="nav-icon">
+                  <mat-icon>{{ child.icon }}</mat-icon>
+                </span>
+                <span class="nav-label">{{ child.label }}</span>
+              </a>
+            </li>
+          </ul>
+        </li>
+      </ng-container>
+    </ng-container>
+  </ul>
+</nav>
+
+<!-- Footer -->
+<div class="sidebar-footer">
+  <div class="help-card">
+    <mat-icon>help_outline</mat-icon>
+    <span>Centro de Ayuda</span>
+  </div>
+  <div class="version-info">
+    <span>v1.0.0</span>
+  </div>
+</div>

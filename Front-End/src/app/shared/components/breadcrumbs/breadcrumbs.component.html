@@ -1,0 +1,23 @@
+<nav class="breadcrumbs" *ngIf="breadcrumbs.length > 1">
+  <ol class="breadcrumbs__list">
+    <li class="breadcrumbs__item" 
+        *ngFor="let crumb of breadcrumbs; let last = last; let first = first">
+      
+      <a class="breadcrumbs__link" 
+         *ngIf="!last" 
+         (click)="navigateTo(crumb)"
+         [class.home]="first">
+        <mat-icon *ngIf="first">{{ crumb.icon }}</mat-icon>
+        <span>{{ crumb.label }}</span>
+      </a>
+
+      <span class="breadcrumbs__current" *ngIf="last">
+        {{ crumb.label }}
+      </span>
+
+      <mat-icon class="breadcrumbs__separator" *ngIf="!last">
+        chevron_right
+      </mat-icon>
+    </li>
+  </ol>
+</nav>

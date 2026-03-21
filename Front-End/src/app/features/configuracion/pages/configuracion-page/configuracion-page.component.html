@@ -1,0 +1,181 @@
+<div class="page-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="page-header__content">
+      <h1 class="page-header__title">Configuración</h1>
+      <p class="page-header__subtitle">Personaliza tu experiencia en la aplicación</p>
+    </div>
+  </div>
+
+  <div class="settings-grid">
+    <!-- Apariencia -->
+    <div class="settings-card">
+      <div class="settings-card__header">
+        <div class="settings-card__icon" style="background: #3b82f615; color: #3b82f6;">
+          <mat-icon>palette</mat-icon>
+        </div>
+        <div class="settings-card__title">
+          <h3>Apariencia</h3>
+          <p>Personaliza la interfaz visual</p>
+        </div>
+      </div>
+
+      <div class="settings-card__content">
+        <div class="setting-item">
+          <div class="setting-item__info">
+            <strong>Modo Oscuro</strong>
+            <span>Cambia entre tema claro y oscuro</span>
+          </div>
+          <div class="theme-selector">
+            <button class="theme-btn" [class.active]="!isDarkMode" (click)="isDarkMode && toggleDarkMode()">
+              <mat-icon>light_mode</mat-icon>
+              <span>Claro</span>
+            </button>
+            <button class="theme-btn" [class.active]="isDarkMode" (click)="!isDarkMode && toggleDarkMode()">
+              <mat-icon>dark_mode</mat-icon>
+              <span>Oscuro</span>
+            </button>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="setting-item">
+          <div class="setting-item__info">
+            <strong>Modo Compacto</strong>
+            <span>Reduce el espaciado para mostrar más contenido</span>
+          </div>
+          <mat-slide-toggle [(ngModel)]="settings.display.compactMode" (change)="saveSettings()"></mat-slide-toggle>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="setting-item">
+          <div class="setting-item__info">
+            <strong>Animaciones</strong>
+            <span>Habilita animaciones y transiciones suaves</span>
+          </div>
+          <mat-slide-toggle [(ngModel)]="settings.display.animations" (change)="saveSettings()"></mat-slide-toggle>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notificaciones -->
+    <div class="settings-card">
+      <div class="settings-card__header">
+        <div class="settings-card__icon" style="background: #22c55e15; color: #22c55e;">
+          <mat-icon>notifications</mat-icon>
+        </div>
+        <div class="settings-card__title">
+          <h3>Notificaciones</h3>
+          <p>Controla cómo recibes alertas</p>
+        </div>
+      </div>
+
+      <div class="settings-card__content">
+        <div class="setting-item">
+          <div class="setting-item__info">
+            <strong>Notificaciones por Email</strong>
+            <span>Recibe alertas importantes en tu correo</span>
+          </div>
+          <mat-slide-toggle [(ngModel)]="settings.notifications.email" (change)="saveSettings()"></mat-slide-toggle>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="setting-item">
+          <div class="setting-item__info">
+            <strong>Notificaciones Push</strong>
+            <span>Alertas en tiempo real en el navegador</span>
+          </div>
+          <mat-slide-toggle [(ngModel)]="settings.notifications.push" (change)="saveSettings()"></mat-slide-toggle>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="setting-item">
+          <div class="setting-item__info">
+            <strong>Resumen Semanal</strong>
+            <span>Recibe un resumen de actividad cada semana</span>
+          </div>
+          <mat-slide-toggle [(ngModel)]="settings.notifications.weekly" (change)="saveSettings()"></mat-slide-toggle>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="setting-item">
+          <div class="setting-item__info">
+            <strong>Alertas de Sistema</strong>
+            <span>Notificaciones sobre el sistema y mantenimientos</span>
+          </div>
+          <mat-slide-toggle [(ngModel)]="settings.notifications.alerts" (change)="saveSettings()"></mat-slide-toggle>
+        </div>
+      </div>
+    </div>
+
+    <!-- Privacidad -->
+    <div class="settings-card">
+      <div class="settings-card__header">
+        <div class="settings-card__icon" style="background: #8b5cf615; color: #8b5cf6;">
+          <mat-icon>security</mat-icon>
+        </div>
+        <div class="settings-card__title">
+          <h3>Privacidad</h3>
+          <p>Gestiona tu información personal</p>
+        </div>
+      </div>
+
+      <div class="settings-card__content">
+        <div class="setting-item">
+          <div class="setting-item__info">
+            <strong>Mostrar Estado en Línea</strong>
+            <span>Permite que otros vean cuando estás conectado</span>
+          </div>
+          <mat-slide-toggle [(ngModel)]="settings.privacy.showOnline" (change)="saveSettings()"></mat-slide-toggle>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="setting-item">
+          <div class="setting-item__info">
+            <strong>Perfil Público</strong>
+            <span>Permite que otros usuarios vean tu perfil</span>
+          </div>
+          <mat-slide-toggle [(ngModel)]="settings.privacy.publicProfile" (change)="saveSettings()"></mat-slide-toggle>
+        </div>
+      </div>
+    </div>
+
+    <!-- Información del Sistema -->
+    <div class="settings-card">
+      <div class="settings-card__header">
+        <div class="settings-card__icon" style="background: #f59e0b15; color: #f59e0b;">
+          <mat-icon>info</mat-icon>
+        </div>
+        <div class="settings-card__title">
+          <h3>Información del Sistema</h3>
+          <p>Datos técnicos de la aplicación</p>
+        </div>
+      </div>
+
+      <div class="settings-card__content">
+        <div class="info-row">
+          <span class="info-label">Versión</span>
+          <span class="info-value">1.0.0</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Entorno</span>
+          <span class="info-value">Producción</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Última actualización</span>
+          <span class="info-value">3 de febrero de 2026</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Angular</span>
+          <span class="info-value">16.2.0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

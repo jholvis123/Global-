@@ -1,0 +1,25 @@
+<div class="form-modal">
+  <!-- Header -->
+  <div class="form-modal__header">
+    <div class="form-modal__title-section">
+      <div class="form-modal__icon" *ngIf="data.icon">
+        <mat-icon>{{ data.icon }}</mat-icon>
+      </div>
+      <div class="form-modal__titles">
+        <h2 class="form-modal__title" mat-dialog-title>{{ data.title }}</h2>
+        <p class="form-modal__subtitle" *ngIf="data.subtitle">{{ data.subtitle }}</p>
+      </div>
+    </div>
+    <button type="button" class="form-modal__close" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Content -->
+  <div class="form-modal__content" mat-dialog-content>
+    <ng-content></ng-content>
+    <ng-container *ngIf="data.formTemplate">
+      <ng-container *ngTemplateOutlet="data.formTemplate"></ng-container>
+    </ng-container>
+  </div>
+</div>

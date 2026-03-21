@@ -1,0 +1,416 @@
+<div class="landing-page">
+  <!-- Navbar -->
+  <nav class="navbar" [class.scrolled]="isScrolled">
+    <div class="navbar__container">
+      <div class="navbar__brand" (click)="scrollToSection('hero')">
+        <mat-icon>fire_truck</mat-icon>
+        <span>GLOBAL <strong>R.L</strong></span>
+      </div>
+      
+      <div class="navbar__links">
+        <a (click)="scrollToSection('services')">Servicios</a>
+        <a (click)="scrollToSection('about')">Nosotros</a>
+        <a (click)="scrollToSection('testimonials')">Testimonios</a>
+        <a (click)="scrollToSection('contact')">Contacto</a>
+      </div>
+
+      <!-- Botón para usuarios NO autenticados -->
+      <button class="navbar__cta" (click)="navigateToLogin()" *ngIf="!isAuthenticated">
+        <mat-icon>login</mat-icon>
+        Iniciar Sesión
+      </button>
+
+      <!-- Botón para usuarios autenticados -->
+      <button class="navbar__cta navbar__cta--dashboard" (click)="goToDashboard()" *ngIf="isAuthenticated">
+        <mat-icon>dashboard</mat-icon>
+        Ir al Panel
+      </button>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section id="hero" class="hero">
+    <div class="hero__background">
+      <div class="hero__shapes">
+        <div class="shape shape--1"></div>
+        <div class="shape shape--2"></div>
+        <div class="shape shape--3"></div>
+      </div>
+      <div class="hero__grid"></div>
+    </div>
+
+    <div class="hero__content">
+      <div class="hero__badge">
+        <mat-icon>verified</mat-icon>
+        <span>Empresa Certificada ISO 9001</span>
+      </div>
+      
+      <h1 class="hero__title">
+        Transporte de Carga
+        <span class="highlight">Seguro y Eficiente</span>
+      </h1>
+      
+      <p class="hero__subtitle">
+        Conectamos tu negocio con soluciones logísticas integrales. 
+        Más de 4 años moviendo el comercio boliviano con confianza y profesionalismo.
+      </p>
+
+      <div class="hero__actions">
+        <button class="btn btn--primary" (click)="scrollToSection('contact')">
+          <mat-icon>phone</mat-icon>
+          Solicitar Cotización
+        </button>
+        <button class="btn btn--secondary" (click)="scrollToSection('services')">
+          <mat-icon>visibility</mat-icon>
+          Ver Servicios
+        </button>
+      </div>
+
+      <div class="hero__stats">
+        <div class="stat" *ngFor="let stat of stats">
+          <mat-icon>{{ stat.icon }}</mat-icon>
+          <div class="stat__info">
+            <span class="stat__value">{{ stat.value }}</span>
+            <span class="stat__label">{{ stat.label }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero__visual">
+      <div class="truck-illustration">
+        <mat-icon class="truck-icon">local_shipping</mat-icon>
+        <div class="truck-glow"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Services Section -->
+  <section id="services" class="services">
+    <div class="section__container">
+      <div class="section__header">
+        <span class="section__badge">Nuestros Servicios</span>
+        <h2 class="section__title">Soluciones Logísticas Completas</h2>
+        <p class="section__subtitle">Ofrecemos una amplia gama de servicios para satisfacer todas tus necesidades de transporte</p>
+      </div>
+
+      <div class="services__grid">
+        <div class="service-card" *ngFor="let service of services">
+          <div class="service-card__icon">
+            <mat-icon>{{ service.icon }}</mat-icon>
+          </div>
+          <h3 class="service-card__title">{{ service.title }}</h3>
+          <p class="service-card__desc">{{ service.description }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section id="about" class="about">
+    <div class="section__container">
+      <div class="about__content">
+        <span class="section__badge">¿Por qué elegirnos?</span>
+        <h2 class="section__title">Más de 4 años siendo tu mejor aliado logístico</h2>
+        <p class="about__text">
+          En GLOBAL R.L nos especializamos en brindar soluciones de transporte de carga pesada 
+          con los más altos estándares de calidad, seguridad y puntualidad. Nuestra flota moderna 
+          y equipo capacitado garantizan que tu mercancía llegue siempre en óptimas condiciones.
+        </p>
+
+        <div class="advantages">
+          <div class="advantage" *ngFor="let adv of advantages">
+            <div class="advantage__icon">
+              <mat-icon>{{ adv.icon }}</mat-icon>
+            </div>
+            <div class="advantage__text">
+              <strong>{{ adv.title }}</strong>
+              <span>{{ adv.desc }}</span>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn btn--primary" (click)="navigateToLogin()">
+          <mat-icon>arrow_forward</mat-icon>
+          Acceder al Sistema
+        </button>
+      </div>
+
+      <div class="about__visual">
+        <div class="about__card">
+          <div class="about__card-icon">
+            <mat-icon>emoji_events</mat-icon>
+          </div>
+          <h4>Empresa Líder</h4>
+          <p>Reconocidos por nuestro compromiso con la excelencia</p>
+        </div>
+        <div class="about__card about__card--accent">
+          <div class="about__card-icon">
+            <mat-icon>groups</mat-icon>
+          </div>
+          <h4>+50 Colaboradores</h4>
+          <p>Equipo profesional y capacitado</p>
+        </div>
+        <div class="about__card">
+          <div class="about__card-icon">
+            <mat-icon>public</mat-icon>
+          </div>
+          <h4>Cobertura Nacional</h4>
+          <p>Llegamos a todo el territorio</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials Section -->
+  <section id="testimonials" class="testimonials">
+    <div class="section__container">
+      <div class="section__header">
+        <span class="section__badge">Testimonios</span>
+        <h2 class="section__title">Lo que dicen nuestros clientes</h2>
+      </div>
+
+      <div class="testimonials__grid">
+        <div class="testimonial-card" *ngFor="let testimonial of testimonials">
+          <div class="testimonial-card__quote">
+            <mat-icon>format_quote</mat-icon>
+          </div>
+          <p class="testimonial-card__text">"{{ testimonial.text }}"</p>
+          <div class="testimonial-card__author">
+            <div class="author-avatar">{{ testimonial.avatar }}</div>
+            <div class="author-info">
+              <strong>{{ testimonial.name }}</strong>
+              <span>{{ testimonial.company }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section id="contact" class="contact">
+    <div class="section__container">
+      <div class="contact__content">
+        <span class="section__badge section__badge--light">Contáctanos</span>
+        <h2 class="section__title section__title--light">¿Listo para trabajar con nosotros?</h2>
+        <p class="contact__text">
+          Estamos aquí para ayudarte. Contáctanos y recibe una cotización personalizada para tus necesidades de transporte.
+        </p>
+
+        <div class="contact__info">
+          <div class="contact__item">
+            <mat-icon>phone</mat-icon>
+            <div>
+              <strong>Teléfono</strong>
+              <span>+591 77712345</span>
+            </div>
+          </div>
+          <div class="contact__item">
+            <mat-icon>email</mat-icon>
+            <div>
+              <strong>Email</strong>
+              <span>contacto@transcarga.com.bo</span>
+            </div>
+          </div>
+          <div class="contact__item">
+            <mat-icon>location_on</mat-icon>
+            <div>
+              <strong>Ubicación</strong>
+              <span>Av. Principal #1234, Santa Cruz, Bolivia</span>
+            </div>
+          </div>
+          <div class="contact__item">
+            <mat-icon>schedule</mat-icon>
+            <div>
+              <strong>Horario</strong>
+              <span>Lun - Sáb: 8:00 - 18:00</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="contact__actions">
+          <button class="btn btn--light" (click)="navigateToLogin()">
+            <mat-icon>login</mat-icon>
+            Acceder al Sistema
+          </button>
+        </div>
+      </div>
+
+      <div class="contact__map">
+        <div class="map-placeholder">
+          <mat-icon>map</mat-icon>
+          <span>Mapa de ubicación</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer__container">
+      <div class="footer__brand">
+        <div class="footer__logo">
+          <mat-icon>fire_truck</mat-icon>
+          <span>TransCarga SRL</span>
+        </div>
+        <p>Soluciones logísticas integrales para tu negocio. Confianza, seguridad y puntualidad en cada entrega.</p>
+        <div class="footer__social">
+          <a href="#"><mat-icon>facebook</mat-icon></a>
+          <a href="#"><mat-icon>language</mat-icon></a>
+          <a href="#"><mat-icon>phone</mat-icon></a>
+        </div>
+      </div>
+
+      <div class="footer__links">
+        <h4>Enlaces Rápidos</h4>
+        <a (click)="scrollToSection('services')">Servicios</a>
+        <a (click)="scrollToSection('about')">Nosotros</a>
+        <a (click)="scrollToSection('testimonials')">Testimonios</a>
+        <a (click)="scrollToSection('contact')">Contacto</a>
+      </div>
+
+      <div class="footer__links">
+        <h4>Servicios</h4>
+        <a>Transporte de Carga</a>
+        <a>Logística Integral</a>
+        <a>Entregas Programadas</a>
+        <a>Carga Asegurada</a>
+      </div>
+
+      <div class="footer__links">
+        <h4>Legal</h4>
+        <a>Términos y Condiciones</a>
+        <a>Política de Privacidad</a>
+        <a>Seguros</a>
+      </div>
+    </div>
+
+    <div class="footer__bottom">
+      <p>© {{ currentYear }} TransCarga SRL. Todos los derechos reservados.</p>
+      <p>Desarrollado con ❤️ en Bolivia</p>
+    </div>
+  </footer>
+
+  <!-- Chatbot Flotante -->
+  <div class="chatbot">
+    <!-- Botón flotante -->
+    <button class="chatbot__trigger" (click)="toggleChat()" [class.active]="isChatOpen">
+      <mat-icon class="icon-chat">smart_toy</mat-icon>
+      <mat-icon class="icon-close">close</mat-icon>
+      <span class="chatbot__badge" *ngIf="!isChatOpen">1</span>
+    </button>
+
+    <!-- Ventana de chat -->
+    <div class="chatbot__window" [class.open]="isChatOpen">
+      <div class="chatbot__header">
+        <div class="chatbot__avatar">
+          <mat-icon>smart_toy</mat-icon>
+        </div>
+        <div class="chatbot__info">
+          <h4>Tu asistente virtual</h4>
+          <span class="chatbot__status">
+            <span class="status-dot"></span>
+            En línea
+          </span>
+        </div>
+        <button class="chatbot__close" (click)="toggleChat()">
+          <mat-icon>remove</mat-icon>
+        </button>
+      </div>
+
+      <div class="chatbot__messages" #chatMessages>
+        <div class="message message--bot" *ngFor="let msg of chatMessages$ | async; let i = index">
+          <div class="message__avatar">
+            <mat-icon>smart_toy</mat-icon>
+          </div>
+          <div class="message__content">
+            <p>{{ msg.text }}</p>
+            <span class="message__time">{{ msg.time }}</span>
+          </div>
+        </div>
+
+        <!-- Mensajes del usuario -->
+        <div class="message message--user" *ngFor="let msg of userMessages">
+          <div class="message__content">
+            <p>{{ msg.text }}</p>
+            <span class="message__time">{{ msg.time }}</span>
+          </div>
+        </div>
+
+        <!-- Mensaje inicial -->
+        <div class="message message--bot" *ngIf="chatHistory.length === 0">
+          <div class="message__avatar">
+            <mat-icon>smart_toy</mat-icon>
+          </div>
+          <div class="message__content">
+            <p>¡Hola!👋 Soy tu asistente virtual. ¿En qué puedo ayudarte hoy?</p>
+            <span class="message__time">Ahora</span>
+          </div>
+        </div>
+
+        <!-- Historial de chat -->
+        <ng-container *ngFor="let msg of chatHistory">
+          <div class="message" [class.message--bot]="msg.sender === 'bot'" [class.message--user]="msg.sender === 'user'">
+            <div class="message__avatar" *ngIf="msg.sender === 'bot'">
+              <mat-icon>smart_toy</mat-icon>
+            </div>
+            <div class="message__content">
+              <p>{{ msg.text }}</p>
+              <span class="message__time">{{ msg.time }}</span>
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- Typing indicator -->
+        <div class="message message--bot typing" *ngIf="isTyping || isProcessingCotizacion">
+          <div class="message__avatar">
+            <mat-icon>smart_toy</mat-icon>
+          </div>
+          <div class="message__content">
+            <div class="typing-dots" *ngIf="!isProcessingCotizacion">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+            <div *ngIf="isProcessingCotizacion">
+              <mat-spinner diameter="20"></mat-spinner>
+              <span style="margin-left: 8px;">Procesando cotización...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Opciones rápidas -->
+      <div class="chatbot__quick-actions" *ngIf="chatHistory.length === 0">
+        <button (click)="sendQuickMessage('¿Cuáles son sus servicios?')">
+          <mat-icon>local_shipping</mat-icon>
+          Servicios
+        </button>
+        <button (click)="sendQuickMessage('¿Necesito una cotización?')">
+          <mat-icon>request_quote</mat-icon>
+          Cotización
+        </button>
+        <button (click)="sendQuickMessage('¿Cuáles son sus horarios de atención?')">
+          <mat-icon>schedule</mat-icon>
+          Horarios
+        </button>
+        <button (click)="sendQuickMessage('Necesito hablar con un asesor')">
+          <mat-icon>support_agent</mat-icon>
+          Asesor
+        </button>
+      </div>
+
+      <div class="chatbot__input">
+        <input 
+          type="text" 
+          placeholder="Escribe tu mensaje..." 
+          [(ngModel)]="chatInput"
+          (keyup.enter)="sendMessage()">
+        <button (click)="sendMessage()" [disabled]="!chatInput.trim()">
+          <mat-icon>send</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

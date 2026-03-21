@@ -1,0 +1,140 @@
+<div class="page-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="page-header__content">
+      <h1 class="page-header__title">Reportes</h1>
+      <p class="page-header__subtitle">Genera y exporta reportes personalizados</p>
+    </div>
+  </div>
+
+  <div class="reportes-layout">
+    <!-- Sidebar de tipos de reporte -->
+    <div class="reportes-sidebar">
+      <h3 class="sidebar-title">Tipo de Reporte</h3>
+      
+      <div class="report-types">
+        <div class="report-type" 
+             *ngFor="let report of reportTypes"
+             [class.active]="selectedReport?.id === report.id"
+             (click)="selectReport(report)">
+          <div class="report-type__icon" [style.background]="report.color + '15'" [style.color]="report.color">
+            <mat-icon>{{ report.icon }}</mat-icon>
+          </div>
+          <div class="report-type__info">
+            <strong>{{ report.name }}</strong>
+            <span>{{ report.description }}</span>
+          </div>
+          <mat-icon class="report-type__arrow">chevron_right</mat-icon>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="reportes-content">
+      <!-- Filtros -->
+      <div class="filters-card">
+        <h4 class="filters-title">
+          <mat-icon>filter_list</mat-icon>
+          Filtros
+        </h4>
+
+        <form [formGroup]="filterForm" class="filters-form">
+          <mat-form-field appearance="outline">
+            <mat-label>Fecha Inicio</mat-label>
+            <input matInput [matDatepicker]="pickerInicio" formControlName="fechaInicio">
+            <mat-datepicker-toggle matSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+            <mat-datepicker #pickerInicio></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Fecha Fin</mat-label>
+            <input matInput [matDatepicker]="pickerFin" formControlName="fechaFin">
+            <mat-datepicker-toggle matSuffix [for]="pickerFin"></mat-datepicker-toggle>
+            <mat-datepicker #pickerFin></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Estado</mat-label>
+            <mat-select formControlName="estado">
+              <mat-option value="">Todos</mat-option>
+              <mat-option value="pendiente">Pendiente</mat-option>
+              <mat-option value="en_ruta">En Ruta</mat-option>
+              <mat-option value="completado">Completado</mat-option>
+              <mat-option value="cancelado">Cancelado</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <button mat-flat-button color="primary" (click)="generateReport()" [disabled]="isLoading">
+            <mat-icon *ngIf="!isLoading">play_arrow</mat-icon>
+            <mat-spinner *ngIf="isLoading" diameter="20"></mat-spinner>
+            {{ isLoading ? 'Generando...' : 'Generar Reporte' }}
+          </button>
+        </form>
+      </div>
+
+      <!-- Resultados -->
+      <div class="results-card" *ngIf="reportData.length > 0">
+        <div class="results-header">
+          <h4 class="results-title">
+            <mat-icon>{{ selectedReport?.icon || 'assessment' }}</mat-icon>
+            {{ selectedReport?.name || 'Resultados' }}
+          </h4>
+
+          <div class="results-actions">
+            <button mat-icon-button [matMenuTriggerFor]="exportMenu" matTooltip="Exportar">
+              <mat-icon>download</mat-icon>
+            </button>
+            <mat-menu #exportMenu="matMenu">
+              <button mat-menu-item (click)="exportPDF()">
+                <mat-icon>picture_as_pdf</mat-icon>
+                <span>Exportar PDF</span>
+              </button>
+              <button mat-menu-item (click)="exportExcel()">
+                <mat-icon>table_chart</mat-icon>
+                <span>Exportar Excel</span>
+              </button>
+              <button mat-menu-item (click)="printReport()">
+                <mat-icon>print</mat-icon>
+                <span>Imprimir</span>
+              </button>
+            </mat-menu>
+          </div>
+        </div>
+
+        <div class="results-table">
+          <table mat-table [dataSource]="reportData">
+            <ng-container *ngFor="let column of displayedColumns" [matColumnDef]="column">
+              <th mat-header-cell *matHeaderCellDef>{{ column | titlecase }}</th>
+              <td mat-cell *matCellDef="let row">
+                <ng-container [ngSwitch]="column">
+                  <span *ngSwitchCase="'monto'">{{ row[column] | currency:'BOB':'Bs ':'1.0-0' }}</span>
+                  <span *ngSwitchCase="'ingresos'">{{ row[column] | currency:'BOB':'Bs ':'1.0-0' }}</span>
+                  <span *ngSwitchCase="'gastos'">{{ row[column] | currency:'BOB':'Bs ':'1.0-0' }}</span>
+                  <span *ngSwitchCase="'utilidad'">{{ row[column] | currency:'BOB':'Bs ':'1.0-0' }}</span>
+                  <span *ngSwitchCase="'estado'" class="status-badge" [ngClass]="'status--' + row[column]?.toLowerCase()">
+                    {{ row[column] }}
+                  </span>
+                  <span *ngSwitchDefault>{{ row[column] }}</span>
+                </ng-container>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+        </div>
+
+        <div class="results-footer">
+          <span class="results-count">{{ reportData.length }} registros encontrados</span>
+        </div>
+      </div>
+
+      <!-- Estado vacío -->
+      <div class="empty-state" *ngIf="reportData.length === 0 && !isLoading">
+        <mat-icon>assessment</mat-icon>
+        <h3>Genera un Reporte</h3>
+        <p>Selecciona el tipo de reporte, configura los filtros y haz clic en "Generar Reporte"</p>
+      </div>
+    </div>
+  </div>
+</div>

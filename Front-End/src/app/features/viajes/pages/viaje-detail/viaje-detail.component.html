@@ -1,0 +1,208 @@
+<app-page-header 
+  [title]="'Viaje #' + viaje?.id" 
+  [subtitle]="viaje?.ruta_completa || (viaje?.origen + ' -> ' + viaje?.destino)"
+  [showBack]="true"
+  (onBack)="goBack()">
+  <button mat-stroked-button [routerLink]="['editar']" *ngIf="viaje?.estado !== 'LIQUIDADO'">
+    <mat-icon>edit</mat-icon>
+    Editar
+  </button>
+  <button mat-raised-button color="accent" 
+          *ngIf="viaje?.estado === 'PLANIFICADO'"
+          (click)="cambiarEstado('EN_RUTA')">
+    <mat-icon>local_shipping</mat-icon>
+    Iniciar Viaje
+  </button>
+  <button mat-raised-button color="primary" 
+          *ngIf="viaje?.estado === 'EN_RUTA'"
+          (click)="cambiarEstado('ENTREGADO')">
+    <mat-icon>check_circle</mat-icon>
+    Marcar Entregado
+  </button>
+</app-page-header>
+
+<div class="detail-grid" *ngIf="viaje">
+  <!-- Estado y resumen -->
+  <mat-card class="status-card">
+    <mat-card-content>
+      <div class="status-header">
+        <app-status-badge [status]="viaje.estado"></app-status-badge>
+        <span class="status-date">{{ viaje.fecha_salida | dateFormat:'datetime' }}</span>
+      </div>
+      <div class="route-display">
+        <div class="route-point">
+          <mat-icon color="primary">location_on</mat-icon>
+          <span>{{ viaje.origen }}</span>
+        </div>
+        <div class="route-line"></div>
+        <div class="route-point">
+          <mat-icon color="accent">flag</mat-icon>
+          <span>{{ viaje.destino }}</span>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Informacion General -->
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>info</mat-icon>
+        Informacion General
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="label">Cliente</span>
+          <span class="value">{{ viaje.cliente?.razon_social || '-' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">Tipo de Carga</span>
+          <span class="value">{{ getTipoCargaLabel(viaje.tipo_carga) }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">Peso</span>
+          <span class="value">{{ viaje.peso_ton }} TON</span>
+        </div>
+        <div class="info-item">
+          <span class="label">Km Estimado</span>
+          <span class="value">{{ viaje.km_estimado }} km</span>
+        </div>
+        <div class="info-item" *ngIf="viaje.km_real">
+          <span class="label">Km Real</span>
+          <span class="value">{{ viaje.km_real }} km</span>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Asignacion -->
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>assignment_ind</mat-icon>
+        Asignacion
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="assignment-item">
+        <mat-icon>local_shipping</mat-icon>
+        <div class="assignment-info">
+          <span class="label">Vehiculo</span>
+          <span class="value">{{ viaje.vehiculo?.placa }} - {{ viaje.vehiculo?.marca }} {{ viaje.vehiculo?.modelo }}</span>
+        </div>
+      </div>
+      <mat-divider></mat-divider>
+      <div class="assignment-item">
+        <mat-icon>badge</mat-icon>
+        <div class="assignment-info">
+          <span class="label">Chofer</span>
+          <span class="value">{{ viaje.chofer?.nombre_completo || (viaje.chofer?.nombre + ' ' + viaje.chofer?.apellido) }}</span>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Informacion Financiera -->
+  <mat-card class="financial-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>payments</mat-icon>
+        Informacion Financiera
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="financial-grid">
+        <div class="financial-item">
+          <span class="label">Tipo de Tarifa</span>
+          <span class="value">{{ getTarifaLabel(viaje.tarifa_tipo) }}</span>
+        </div>
+        <div class="financial-item">
+          <span class="label">Valor Tarifa</span>
+          <span class="value">{{ viaje.tarifa_valor | currencyBs }}</span>
+        </div>
+        <div class="financial-item highlight">
+          <span class="label">Ingreso Total</span>
+          <span class="value success">{{ viaje.ingreso_total_bs | currencyBs }}</span>
+        </div>
+        <div class="financial-item" *ngIf="viaje.total_gastos_bs">
+          <span class="label">Total Gastos</span>
+          <span class="value error">{{ viaje.total_gastos_bs | currencyBs }}</span>
+        </div>
+        <div class="financial-item highlight" *ngIf="viaje.margen_bruto_bs">
+          <span class="label">Margen Bruto</span>
+          <span class="value" [class.success]="viaje.margen_bruto_bs! > 0" [class.error]="viaje.margen_bruto_bs! < 0">
+            {{ viaje.margen_bruto_bs | currencyBs }}
+          </span>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Gastos del Viaje -->
+  <mat-card class="full-width">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>receipt</mat-icon>
+        Gastos del Viaje
+      </mat-card-title>
+      <button mat-button color="primary" (click)="addGasto()" *ngIf="viaje.estado !== 'LIQUIDADO'">
+        <mat-icon>add</mat-icon>
+        Agregar Gasto
+      </button>
+    </mat-card-header>
+    <mat-card-content>
+      <table mat-table [dataSource]="viaje.gastos || []" *ngIf="viaje.gastos?.length; else noGastos">
+        <ng-container matColumnDef="tipo">
+          <th mat-header-cell *matHeaderCellDef> Tipo </th>
+          <td mat-cell *matCellDef="let gasto">
+            <span class="gasto-tipo">{{ getTipoGastoLabel(gasto.tipo) }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="descripcion">
+          <th mat-header-cell *matHeaderCellDef> Descripcion </th>
+          <td mat-cell *matCellDef="let gasto"> {{ gasto.descripcion || '-' }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="fecha">
+          <th mat-header-cell *matHeaderCellDef> Fecha </th>
+          <td mat-cell *matCellDef="let gasto"> {{ gasto.fecha | dateFormat }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="monto">
+          <th mat-header-cell *matHeaderCellDef> Monto </th>
+          <td mat-cell *matCellDef="let gasto"> {{ gasto.monto_bs | currencyBs }} </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="gastosColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: gastosColumns;"></tr>
+      </table>
+
+      <ng-template #noGastos>
+        <app-empty-state
+          icon="receipt_long"
+          title="Sin gastos registrados"
+          message="No se han registrado gastos para este viaje">
+        </app-empty-state>
+      </ng-template>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Notas -->
+  <mat-card class="full-width" *ngIf="viaje.notas">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>notes</mat-icon>
+        Notas
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <p>{{ viaje.notas }}</p>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+<app-loading-spinner *ngIf="isLoading" [overlay]="true" message="Cargando viaje...">
+</app-loading-spinner>

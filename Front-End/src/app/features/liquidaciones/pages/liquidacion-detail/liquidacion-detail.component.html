@@ -1,0 +1,219 @@
+<div class="page-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="page-header__content">
+      <button mat-icon-button (click)="goBack()" class="back-btn">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div class="header-info">
+        <h1 class="page-header__title">
+          Detalle de Liquidación
+          <span class="liquidacion-code" *ngIf="liquidacion">{{ liquidacion.codigo }}</span>
+        </h1>
+        <p class="page-header__subtitle">Información completa de la liquidación</p>
+      </div>
+    </div>
+    <div class="page-header__actions" *ngIf="liquidacion">
+      <button mat-stroked-button (click)="printLiquidacion()">
+        <mat-icon>print</mat-icon>
+        Imprimir
+      </button>
+      <button mat-stroked-button (click)="exportToPDF()">
+        <mat-icon>picture_as_pdf</mat-icon>
+        Exportar PDF
+      </button>
+      <button mat-flat-button color="primary" (click)="editLiquidacion()">
+        <mat-icon>edit</mat-icon>
+        Editar
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Cargando información...</p>
+  </div>
+
+  <!-- Content -->
+  <div class="detail-content" *ngIf="!loading && liquidacion">
+    <!-- Estado Badge -->
+    <div class="status-banner" [ngClass]="getEstadoClass(liquidacion.estado)">
+      <mat-icon>
+        {{ liquidacion.estado === 'completada' ? 'check_circle' : 
+           liquidacion.estado === 'pendiente' ? 'schedule' :
+           liquidacion.estado === 'en_proceso' ? 'autorenew' : 'cancel' }}
+      </mat-icon>
+      <span>{{ getEstadoLabel(liquidacion.estado) }}</span>
+    </div>
+
+    <!-- Grid Layout -->
+    <div class="detail-grid">
+      <!-- Información del Viaje -->
+      <div class="detail-card">
+        <div class="card-header">
+          <mat-icon>local_shipping</mat-icon>
+          <h3>Información del Viaje</h3>
+        </div>
+        <div class="card-body">
+          <div class="info-row">
+            <span class="label">Ruta:</span>
+            <span class="value">{{ liquidacion.viaje.origen }} → {{ liquidacion.viaje.destino }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Fecha:</span>
+            <span class="value">{{ liquidacion.viaje.fecha | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Cliente:</span>
+            <span class="value">{{ liquidacion.viaje.cliente }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vehículo y Chofer -->
+      <div class="detail-card">
+        <div class="card-header">
+          <mat-icon>directions_car</mat-icon>
+          <h3>Vehículo y Chofer</h3>
+        </div>
+        <div class="card-body">
+          <div class="info-row">
+            <span class="label">Vehículo:</span>
+            <span class="value">{{ liquidacion.vehiculo.modelo }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Placa:</span>
+            <span class="value highlight">{{ liquidacion.vehiculo.placa }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Chofer:</span>
+            <span class="value">{{ liquidacion.chofer.nombre }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">DNI:</span>
+            <span class="value">{{ liquidacion.chofer.documento }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ingresos -->
+      <div class="detail-card income-card">
+        <div class="card-header">
+          <mat-icon>trending_up</mat-icon>
+          <h3>Ingresos</h3>
+        </div>
+        <div class="card-body">
+          <div class="info-row">
+            <span class="label">Flete:</span>
+            <span class="value money">S/. {{ liquidacion.ingresos.flete | number:'1.2-2' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Adicionales:</span>
+            <span class="value money">S/. {{ liquidacion.ingresos.adicionales | number:'1.2-2' }}</span>
+          </div>
+          <div class="info-row total">
+            <span class="label">Total Ingresos:</span>
+            <span class="value money success">S/. {{ liquidacion.ingresos.total | number:'1.2-2' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gastos -->
+      <div class="detail-card expenses-card">
+        <div class="card-header">
+          <mat-icon>trending_down</mat-icon>
+          <h3>Gastos</h3>
+        </div>
+        <div class="card-body">
+          <div class="info-row">
+            <span class="label">Combustible:</span>
+            <span class="value money">S/. {{ liquidacion.gastos.combustible | number:'1.2-2' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Peajes:</span>
+            <span class="value money">S/. {{ liquidacion.gastos.peajes | number:'1.2-2' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Viáticos:</span>
+            <span class="value money">S/. {{ liquidacion.gastos.viaticos | number:'1.2-2' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Otros:</span>
+            <span class="value money">S/. {{ liquidacion.gastos.otros | number:'1.2-2' }}</span>
+          </div>
+          <div class="info-row total">
+            <span class="label">Total Gastos:</span>
+            <span class="value money danger">S/. {{ liquidacion.gastos.total | number:'1.2-2' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Anticipos -->
+      <div class="detail-card">
+        <div class="card-header">
+          <mat-icon>payment</mat-icon>
+          <h3>Anticipos</h3>
+        </div>
+        <div class="card-body">
+          <div class="anticipos-list" *ngIf="liquidacion.anticipos.length > 0">
+            <div class="anticipo-item" *ngFor="let anticipo of liquidacion.anticipos; let i = index">
+              <span class="anticipo-number">#{{ i + 1 }}</span>
+              <span class="anticipo-date">{{ anticipo.fecha | date:'dd/MM/yyyy' }}</span>
+              <span class="anticipo-monto">S/. {{ anticipo.monto | number:'1.2-2' }}</span>
+            </div>
+          </div>
+          <div class="no-anticipos" *ngIf="liquidacion.anticipos.length === 0">
+            <mat-icon>info</mat-icon>
+            <span>No hay anticipos registrados</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resultado -->
+      <div class="detail-card result-card">
+        <div class="card-header">
+          <mat-icon>account_balance</mat-icon>
+          <h3>Resultado</h3>
+        </div>
+        <div class="card-body">
+          <div class="info-row">
+            <span class="label">Resultado Bruto:</span>
+            <span class="value money">S/. {{ liquidacion.resultado.bruto | number:'1.2-2' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Resultado Neto:</span>
+            <span class="value money">S/. {{ liquidacion.resultado.neto | number:'1.2-2' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Comisión Chofer (30%):</span>
+            <span class="value money warning">S/. {{ liquidacion.resultado.comisionChofer | number:'1.2-2' }}</span>
+          </div>
+          <div class="info-row total">
+            <span class="label">Utilidad Empresa:</span>
+            <span class="value money success">S/. {{ liquidacion.resultado.utilidadEmpresa | number:'1.2-2' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Observaciones -->
+    <div class="detail-card observations-card" *ngIf="liquidacion.observaciones">
+      <div class="card-header">
+        <mat-icon>notes</mat-icon>
+        <h3>Observaciones</h3>
+      </div>
+      <div class="card-body">
+        <p class="observations-text">{{ liquidacion.observaciones }}</p>
+      </div>
+    </div>
+
+    <!-- Footer Info -->
+    <div class="detail-footer">
+      <span class="creation-date">
+        <mat-icon>calendar_today</mat-icon>
+        Creado el {{ liquidacion.fechaCreacion | date:'dd/MM/yyyy' }}
+      </span>
+    </div>
+  </div>
+</div>

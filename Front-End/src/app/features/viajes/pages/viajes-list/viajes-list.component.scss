@@ -1,0 +1,105 @@
+:host {
+  display: block;
+}
+
+// Filter Card
+.filter-card {
+  margin-bottom: var(--space-5);
+  
+  .mat-mdc-card-content {
+    padding: var(--space-4) !important;
+  }
+}
+
+.filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: flex-end;
+
+  mat-form-field {
+    flex: 1;
+    min-width: 180px;
+    margin-bottom: 0;
+  }
+
+  button {
+    height: 48px;
+  }
+}
+
+// Table Card
+.table-wrapper {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+}
+
+// Ruta Cell
+.ruta-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  strong {
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: var(--text-tertiary);
+  }
+}
+
+// Currency Value
+.currency-value {
+  font-weight: 600;
+  color: var(--success);
+  font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+}
+
+// Clickable Row
+.clickable-row {
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+
+  &:hover {
+    background: var(--bg-hover) !important;
+  }
+}
+
+// Actions Menu Button
+.action-menu-btn {
+  width: 36px;
+  height: 36px;
+  
+  mat-icon {
+    font-size: 20px;
+    color: var(--text-secondary);
+  }
+
+  &:hover {
+    background: var(--gray-100);
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .filters-row {
+    mat-form-field {
+      min-width: 100%;
+    }
+  }
+}

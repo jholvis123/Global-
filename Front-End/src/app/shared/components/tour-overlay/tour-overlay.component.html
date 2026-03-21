@@ -1,0 +1,45 @@
+<div class="tour-overlay" *ngIf="isActive">
+  <!-- Backdrop -->
+  <div class="tour-backdrop"></div>
+  
+  <!-- Highlight -->
+  <div class="tour-highlight" [ngStyle]="highlightStyle"></div>
+  
+  <!-- Tooltip -->
+  <div class="tour-tooltip" [ngStyle]="tooltipStyle" *ngIf="currentStep">
+    <div class="tooltip-header">
+      <span class="step-indicator">{{ currentStepIndex + 1 }} / {{ totalSteps }}</span>
+      <button class="close-btn" (click)="skip()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    
+    <div class="tooltip-content">
+      <h3 class="tooltip-title">{{ currentStep.title }}</h3>
+      <p class="tooltip-text">{{ currentStep.content }}</p>
+    </div>
+    
+    <div class="tooltip-progress">
+      <div class="progress-bar" [style.width.%]="progress"></div>
+    </div>
+    
+    <div class="tooltip-actions">
+      <button mat-button (click)="skip()" class="skip-btn">
+        Omitir tour
+      </button>
+      <div class="nav-buttons">
+        <button mat-stroked-button 
+                (click)="previous()" 
+                [disabled]="currentStepIndex === 0">
+          <mat-icon>chevron_left</mat-icon>
+          Anterior
+        </button>
+        <button mat-flat-button color="primary" (click)="next()">
+          {{ currentStepIndex === totalSteps - 1 ? 'Finalizar' : 'Siguiente' }}
+          <mat-icon *ngIf="currentStepIndex < totalSteps - 1">chevron_right</mat-icon>
+          <mat-icon *ngIf="currentStepIndex === totalSteps - 1">check</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

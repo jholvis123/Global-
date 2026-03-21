@@ -1,0 +1,162 @@
+<app-page-header 
+  [title]="socio?.nombre_completo || (socio?.nombre + ' ' + socio?.apellido)" 
+  subtitle="Detalle del socio"
+  [showBack]="true"
+  (onBack)="goBack()">
+  <button mat-stroked-button [routerLink]="['editar']">
+    <mat-icon>edit</mat-icon>
+    Editar
+  </button>
+</app-page-header>
+
+<div class="detail-grid" *ngIf="socio">
+  <!-- Informacion Personal -->
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title><mat-icon>person</mat-icon> Informacion Personal</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="profile-header">
+        <div class="avatar">{{ getInitials() }}</div>
+        <div class="profile-info">
+          <h3>{{ socio.nombre }} {{ socio.apellido }}</h3>
+          <app-status-badge [status]="socio.estado"></app-status-badge>
+        </div>
+      </div>
+      <div class="info-grid">
+        <div class="info-item">
+          <mat-icon>badge</mat-icon>
+          <div>
+            <span class="label">Cedula de Identidad</span>
+            <span class="value">{{ socio.ci }}</span>
+          </div>
+        </div>
+        <div class="info-item">
+          <mat-icon>phone</mat-icon>
+          <div>
+            <span class="label">Telefono</span>
+            <span class="value">{{ socio.telefono || '-' }}</span>
+          </div>
+        </div>
+        <div class="info-item" *ngIf="socio.email">
+          <mat-icon>email</mat-icon>
+          <div>
+            <span class="label">Email</span>
+            <span class="value">{{ socio.email }}</span>
+          </div>
+        </div>
+        <div class="info-item" *ngIf="socio.direccion">
+          <mat-icon>location_on</mat-icon>
+          <div>
+            <span class="label">Direccion</span>
+            <span class="value">{{ socio.direccion }}</span>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Configuracion Financiera -->
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title><mat-icon>payments</mat-icon> Configuracion Financiera</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="percentage-display">
+        <div class="percentage-item">
+          <span class="percentage-value primary">{{ socio.porcentaje_ganancia || 0 }}%</span>
+          <span class="percentage-label">Porcentaje Socio</span>
+        </div>
+        <div class="percentage-divider"></div>
+        <div class="percentage-item">
+          <span class="percentage-value accent">{{ 100 - (socio.porcentaje_ganancia || 0) }}%</span>
+          <span class="percentage-label">Porcentaje Empresa</span>
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <div class="bank-info" *ngIf="socio.banco || socio.cuenta_bancaria">
+        <mat-icon>account_balance</mat-icon>
+        <div>
+          <span class="label">Cuenta Bancaria</span>
+          <span class="value">{{ socio.banco || 'Sin banco' }} - {{ socio.cuenta_bancaria || 'Sin cuenta' }}</span>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Vehiculos -->
+  <mat-card class="full-width">
+    <mat-card-header>
+      <mat-card-title><mat-icon>local_shipping</mat-icon> Vehiculos Asociados</mat-card-title>
+      <button mat-button color="primary" routerLink="/app/vehiculos/nuevo">
+        <mat-icon>add</mat-icon>
+        Agregar Vehiculo
+      </button>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="vehiculos-grid" *ngIf="socio.vehiculos?.length; else noVehiculos">
+        <div class="vehiculo-card" *ngFor="let vehiculo of socio.vehiculos">
+          <div class="vehiculo-icon">
+            <mat-icon>local_shipping</mat-icon>
+          </div>
+          <div class="vehiculo-info">
+            <span class="placa">{{ vehiculo.placa }}</span>
+            <span class="modelo">{{ vehiculo.marca }} {{ vehiculo.modelo }}</span>
+            <app-status-badge [status]="vehiculo.estado" size="small"></app-status-badge>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #noVehiculos>
+        <app-empty-state
+          icon="local_shipping"
+          title="Sin vehiculos"
+          message="Este socio no tiene vehiculos asociados">
+        </app-empty-state>
+      </ng-template>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Resumen Financiero -->
+  <mat-card class="full-width">
+    <mat-card-header>
+      <mat-card-title><mat-icon>analytics</mat-icon> Resumen Financiero del Mes</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="financial-summary">
+        <div class="summary-item">
+          <mat-icon color="primary">route</mat-icon>
+          <div>
+            <span class="value">{{ resumenFinanciero.totalViajes }}</span>
+            <span class="label">Viajes Realizados</span>
+          </div>
+        </div>
+        <div class="summary-item">
+          <mat-icon class="success">attach_money</mat-icon>
+          <div>
+            <span class="value">{{ resumenFinanciero.ingresosBrutos | currencyBs }}</span>
+            <span class="label">Ingresos Brutos</span>
+          </div>
+        </div>
+        <div class="summary-item">
+          <mat-icon class="warning">trending_down</mat-icon>
+          <div>
+            <span class="value">{{ resumenFinanciero.gastos | currencyBs }}</span>
+            <span class="label">Gastos</span>
+          </div>
+        </div>
+        <div class="summary-item highlight">
+          <mat-icon color="accent">account_balance_wallet</mat-icon>
+          <div>
+            <span class="value">{{ resumenFinanciero.gananciaSocio | currencyBs }}</span>
+            <span class="label">Ganancia del Socio</span>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+<app-loading-spinner *ngIf="isLoading" [overlay]="true" message="Cargando..."></app-loading-spinner>

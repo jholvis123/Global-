@@ -1,0 +1,54 @@
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.status-activo, .status-vigente, .status-entregado {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.status-inactivo, .status-baja {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.status-bloqueado, .status-suspendido {
+  background-color: #fff3e0;
+  color: #ef6c00;
+}
+
+.status-pendiente, .status-planificado {
+  background-color: #e3f2fd;
+  color: #1565c0;
+}
+
+.status-en_ruta {
+  background-color: #fff8e1;
+  color: #f57f17;
+}
+
+.status-liquidado {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.status-mantenimiento {
+  background-color: #fce4ec;
+  color: #c2185b;
+}
+
+.status-preventivo {
+  background-color: #e0f7fa;
+  color: #00838f;
+}
+
+.status-correctivo {
+  background-color: #ffccbc;
+  color: #bf360c;
+}

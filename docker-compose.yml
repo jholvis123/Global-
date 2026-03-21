@@ -1,0 +1,96 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  database:
+    image: postgres:15-alpine
+    container_name: gestion-transporte-db
+    environment:
+      POSTGRES_DB: gestion_transporte
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database:/docker-entrypoint-initdb.d
+    networks:
+      - gestion-transporte-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d gestion_transporte"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # FastAPI Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: gestion-transporte-backend
+    environment:
+      - DATABASE_URL=sqlite:///./gestion_transporte.db
+      - SECRET_KEY=tu_clave_secreta_super_segura_para_produccion_cambiarla_aqui
+      - DEBUG=True
+      - ENVIRONMENT=development
+      - CORS_ORIGINS=http://localhost:4200,http://localhost
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - backend_uploads:/app/uploads
+    networks:
+      - gestion-transporte-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Angular Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: gestion-transporte-frontend
+    ports:
+      - "80:80"
+    volumes:
+      - ./frontend/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - gestion-transporte-network
+    depends_on:
+      - backend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis para cache (opcional)
+  redis:
+    image: redis:7-alpine
+    container_name: gestion-transporte-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - gestion-transporte-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+
+volumes:
+  sqlserver_data:
+    driver: local
+  backend_uploads:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  gestion-transporte-network:
+    driver: bridge

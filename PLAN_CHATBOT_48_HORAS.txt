@@ -1,0 +1,537 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                                                                            ║
+║               PLAN ACELERADO: CHATBOT FUNCIONAL EN 2 DÍAS                ║
+║          Sistema de Gestión de Autotransporte - Feature: Chatbot         ║
+║                                                                            ║
+║                         OBJETIVO: 100% FUNCIONAL                         ║
+║                         PLAZO: 48 HORAS MÁXIMO                           ║
+║                                                                            ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+
+================================================================================
+DÍA 1: BACKEND CHATBOT (12 HORAS)
+================================================================================
+
+HORA 0-1: Verificar y Levantar Backend
+───────────────────────────────────────
+[ ] 1. Matar procesos en puerto 8000
+    netstat -ano | findstr :8000
+    taskkill /PID <pid> /F (repetir para cada)
+
+[ ] 2. Navegar a carpeta backend
+    cd "d:/Elvis-SecretProyect/Global/Global-/backend"
+
+[ ] 3. Activar venv
+    venv\Scripts\activate
+
+[ ] 4. Instalar dependencias (si falta)
+    pip install -r requirements.txt
+
+[ ] 5. Levantar servidor
+    uvicorn app.main:app --port 8000 --reload
+
+[ ] 6. Verificar que inicia correctamente
+    Buscar en logs:
+    "Application startup complete"
+    "Data de chatbot ya existe, saltando seed..."
+
+RESULTADO: Backend corriendo en http://localhost:8000
+
+
+HORA 1-2: Testear Endpoint de Chatbot
+──────────────────────────────────────
+[ ] 1. Abrir PowerShell EN OTRA VENTANA (mantener backend ejecutándose)
+
+[ ] 2. Testear health check
+    curl http://localhost:8000/api/v1/chatbot/health
+    
+    Respuesta esperada:
+    {"status": "healthy", "module": "chatbot"}
+
+[ ] 3. Testear cotización básica
+    curl -X POST http://localhost:8000/api/v1/chatbot/cotizar ^
+      -H "Content-Type: application/json" ^
+      -d "{\"mensaje_texto\":\"Necesito 500kg desde Santa Cruz a La Paz\"}"
+    
+    Respuesta esperada:
+    {
+      "id_solicitud": <numero>,
+      "origen": "Santa Cruz",
+      "destino": "La Paz",
+      "peso_kg": 500,
+      "tipo_carga": "general",
+      "precio_cotizado_bs": 650.0,
+      "fecha": "2026-03-16T..."
+    }
+
+[ ] 4. Si da error 500:
+    [ ] Ver logs en consola del backend
+    [ ] Verificar que base de datos existe
+    [ ] Verificar que tablas de zonas/tarifas tienen datos
+
+
+HORA 2-4: Revisar y Arreglar NLP
+─────────────────────────────────
+Ubicación: backend/app/infrastructure/chatbot/nlp/spacy_service.py
+
+[ ] 1. Abrir archivo y revisar ciudades bolivianas que reconoce
+    Debe incluir: La Paz, Santa Cruz, Cochabamba, Sucre, etc.
+
+[ ] 2. Testear diferentes formatos de entrada
+    
+    Prueba 1: "Necesito transportar 500kg desde Santa Cruz a La Paz"
+    Esperado: ✓ Detecta Santa Cruz, La Paz, 500kg
+    
+    Prueba 2: "De La Paz a Cochabamba con 2 toneladas"
+    Esperado: ✓ Detecta La Paz, Cochabamba, 2000kg (convertido)
+    
+    Prueba 3: "500 kilogramos La Paz → Sucre"
+    Esperado: ✓ Detecta La Paz, Sucre, 500kg
+    
+    Si algunas fallan, mejorar regex en spacy_service.py
+
+[ ] 3. Testear tipos de carga
+    
+    Prueba: "Necesito transportar carga peligrosa desde Santa Cruz a La Paz"
+    Esperado: tipo_carga = "peligrosa"
+    
+    Prueba: "Quiero llevar productos refrigerados desde La Paz a Sucre"
+    Esperado: tipo_carga = "refrigerada"
+
+
+HORA 4-6: Validar Base de Datos y Tarifas
+───────────────────────────────────────────
+[ ] 1. Verificar que tabla zonageografica tiene datos
+    Desde Python en terminal backend:
+    
+    from app.db.database import SessionLocal
+    from app.domain.chatbot.entities import ZonaGeografica
+    
+    db = SessionLocal()
+    zonas = db.query(ZonaGeografica).all()
+    print(f"Zonas: {len(zonas)}")
+    for zona in zonas:
+        print(f"  - {zona.nombre}")
+
+[ ] 2. Verificar tabla tarifa tiene datos
+    
+    from app.domain.chatbot.entities import Tarifa
+    tarifas = db.query(Tarifa).all()
+    print(f"Tarifas: {len(tarifas)}")
+    for tarifa in tarifas:
+        print(f"  {tarifa.zona_origen.nombre} → {tarifa.zona_destino.nombre}: {tarifa.precio_base}")
+
+[ ] 3. Si faltan datos:
+    [ ] Revisar app/main.py función seed_chatbot_data()
+    [ ] Ejecutar manualmente el seed:
+        
+        from app.main import seed_chatbot_data
+        import asyncio
+        asyncio.run(seed_chatbot_data(None))
+
+
+HORA 6-8: Endpoint /cotizar Completamente Funcional
+────────────────────────────────────────────────────
+Ubicación: backend/app/presentation/chatbot/router.py
+
+[ ] 1. Abrir router.py y revisar que /cotizar acepte POST
+
+[ ] 2. Verificar que respuesta incluye todos los campos:
+    {
+      "id_solicitud": int,
+      "origen": str,
+      "destino": str,
+      "peso_kg": float,
+      "tipo_carga": str,
+      "precio_cotizado_bs": float,
+      "fecha": datetime
+    }
+
+[ ] 3. Testear 10 casos variados en PowerShell
+    (Crear archivo test_chatbot_casos.ps1)
+
+    $casos = @(
+        "Necesito 500kg desde Santa Cruz a La Paz",
+        "De La Paz para Cochabamba, 2 toneladas",
+        "Quiero llevar carga peligrosa desde Sucre a Santa Cruz, 300kg",
+        "Necesito refrigerados de La Paz a Sucre, 1000kg",
+        "Transportar 100kg desde Cochabamba a La Paz",
+        "Frágil: 200kg, origen Santa Cruz, destino Sucre",
+        "5 toneladas de general desde La Paz a Santa Cruz"
+    )
+
+    foreach ($caso in $casos) {
+        Write-Host "Test: $caso"
+        $response = Invoke-RestMethod -Uri "http://localhost:8000/api/v1/chatbot/cotizar" `
+          -Method POST `
+          -ContentType "application/json" `
+          -Body "{`"mensaje_texto`":`"$caso`"}"
+        
+        if ($response.precio_cotizado_bs -gt 0) {
+            Write-Host "✓ OK - Precio: $($response.precio_cotizado_bs) Bs" -ForegroundColor Green
+        } else {
+            Write-Host "✗ FALLO - Respuesta: $response" -ForegroundColor Red
+        }
+    }
+
+[ ] 4. Todos deben retornar estado 200 con precio > 0
+
+
+HORA 8-10: Persistencia en Base de Datos
+─────────────────────────────────────────
+[ ] 1. Verificar que solicitudes se guardan en tabla solicitud_cotizacion
+
+    from app.domain.chatbot.entities import SolicitudCotizacion
+    solicitudes = db.query(SolicitudCotizacion).all()
+    print(f"Solicitudes guardadas: {len(solicitudes)}")
+
+[ ] 2. Cada cotización debe crear un registro:
+    - id_solicitud auto-generado
+    - texto_original guardado
+    - origen, destino, peso, tipo_carga, precio guardados
+    - fecha_solicitud con timestamp
+
+[ ] 3. Historial de cotizaciones debe ser consultable
+    GET /chatbot/historial (crear si no existe)
+    Retorna últimas 10 cotizaciones
+
+
+HORA 10-12: Documentación y Swagger
+────────────────────────────────────
+[ ] 1. Verificar que Swagger documenta /cotizar
+    curl http://localhost:8000/docs
+    Buscar: POST /api/v1/chatbot/cotizar
+
+[ ] 2. Swagger debe mostrar:
+    - Descripción del endpoint
+    - Parámetro de entrada: mensaje_texto (string)
+    - Respuesta exitosa (200): CotizacionResponse con todos los campos
+    - Respuestas de error (400, 422, 500)
+
+[ ] 3. Si falta, agregar docstring en router.py:
+    
+    @router.post("/cotizar", response_model=CotizacionResponse)
+    async def procesar_cotizacion(request: CotizacionRequest):
+        """
+        Generar cotización basada en mensaje de usuario
+        
+        - **mensaje_texto**: String con descripción del envío
+                            Ej: "500kg desde Santa Cruz a La Paz"
+        
+        Returns:
+            CotizacionResponse con origen, destino, peso, tipo, precio
+        
+        Status Codes:
+            200: Cotización exitosa
+            400: Origen/destino no válidos
+            422: Validación fallida
+            500: Error interno
+        """
+
+
+RESULTADO DÍA 1:
+✓ Backend ejecutándose
+✓ Endpoint /cotizar funcional
+✓ Base de datos con datos seed
+✓ NLP extrayendo entidades correctamente
+✓ Cálculo de tarifas funcionando
+✓ Respuestas guardadas en BD
+
+
+================================================================================
+DÍA 2: FRONTEND + INTEGRACIÓN (12 HORAS)
+================================================================================
+
+HORA 0-2: Verificar Frontend en Runner
+───────────────────────────────────────
+[ ] 1. En OTRA terminal (PowerShell nueva)
+    cd "d:/Elvis-SecretProyect/Global/Global-/Front-End"
+
+[ ] 2. Instalar si no está listo
+    npm install
+
+[ ] 3. Levantar servidor
+    npm start
+
+[ ] 4. Verificar que http://localhost:4200 carga sin errores
+    - Landing page visible
+    - Chat widget visible en esquina
+
+
+HORA 2-4: Configurar Base URL del API
+──────────────────────────────────────
+Archivo: Front-End/src/environments/environment.ts
+
+[ ] 1. Verificar que apiUrl apunta a localhost:8000
+    
+    export const environment = {
+      production: false,
+      apiUrl: 'http://localhost:8000/api/v1'  // ← CRÍTICO
+    };
+
+[ ] 2. Si es diferente, cambiar a:
+    apiUrl: 'http://localhost:8000/api/v1'
+
+[ ] 3. Guardar archivo
+    
+[ ] 4. Angular debería recargar automáticamente
+
+
+HORA 4-6: Verificar Servicios
+──────────────────────────────
+Ubicación: Front-End/src/app/core/services/
+
+[ ] 1. Abrir chatbot.service.ts
+    
+    [ ] Verificar que generarCotizacion() hacePOST a /api/v1/chatbot/cotizar
+    [ ] Verificar que mapea mensaje_texto correctamente
+    [ ] Verificar que retorna Observable<CotizacionResponse>
+
+[ ] 2. Abrir chatbot-state.service.ts
+    
+    [ ] Verificar que maneja state con BehaviorSubject
+    [ ] Métodos: setLoading, setError, setCotizacion, clearError, resetState
+    [ ] state$ observable expuesto
+
+
+HORA 6-8: Verificar Componentes
+────────────────────────────────
+Ubicación: Front-End/src/app/features/chatbot/
+
+[ ] 1. Abrir chatbot.component.ts
+    
+    [ ] Inyecta ChatbotService
+    [ ] Inyecta ChatbotStateService
+    [ ] onSubmit() llama a service.generarCotizacion()
+    [ ] Visualiza estado con async pipe
+
+[ ] 2. Verificar chatbot.component.html
+    
+    [ ] Formulario con input para mensaje
+    [ ] Botón Submit
+    [ ] Muestra spinner mientras carga
+    [ ] Muestra cotización si éxito
+    [ ] Muestra error si falla
+
+[ ] 3. Verificar landing-page.component.ts
+    
+    [ ] Importa ChatbotService
+    [ ] Integra chatbot en landing page
+    [ ] Chat widget visible
+
+
+HORA 8-10: Test Manual en Browser
+──────────────────────────────────
+[ ] 1. Abrir http://localhost:4200 en navegador
+
+[ ] 2. Navegar a landing page
+    [ ] Chat widget visible en esquina/bottom ✓
+
+[ ] 3. Click en widget, debería abrir chat
+
+[ ] 4. Escribir en chat:
+    "Necesito 500kg desde Santa Cruz a La Paz"
+
+[ ] 5. Esperar respuesta
+    Debe verse:
+    - Spinner mientras procesa
+    - Respuesta: "Cotización: 650 Bs"
+               "De: Santa Cruz → A: La Paz"
+               "Peso: 500 kg"
+               "Tipo: General"
+
+[ ] 6. Probar 5 casos más
+    
+    Caso 1: "De La Paz a Cochabamba, 2 toneladas"
+    Caso 2: "Carga peligrosa: 300kg Santa Cruz a Sucre"
+    Caso 3: "500kg refrigerado La Paz a Santa Cruz"
+    Caso 4: "Envío frágil 100kg Cochabamba a La Paz"
+    Caso 5: "1 tonelada general desde Sucre a Santa Cruz"
+
+
+HORA 10-12: Fix de Problemas Encontrados
+──────────────────────────────────────────
+Si hay problemas, debugging paso a paso:
+
+PROBLEMA: "Network Error" en frontend
+  [ ] Ver console del navegador (F12)
+  [ ] Ver Network tab
+  [ ] Verificar que request va a http://localhost:8000/api/v1/chatbot/cotizar
+  [ ] Backend está corriendo en 8000? Checklist Día 1, Hora 0-1
+  [ ] CORS configurado? Verificar app/main.py
+
+PROBLEMA: "Error: 422 Unprocessable Entity"
+  [ ] JSON mal formado
+  [ ] Cambiar campo a "mensaje_texto" (no "mensaje")
+  
+PROBLEMA: "Error: 500 Internal Server Error"
+  [ ] Ver logs en backend (consola backend)
+  [ ] Validar que tablas zonageografica/tarifa tienen datos
+  [ ] Validar SQL queries en logs
+
+PROBLEMA: Precio calculado es 0
+  [ ] NLP no extrae peso correctamente
+  [ ] Mejorar regex en spacy_service.py
+  [ ] Probar con formato más simple
+
+
+RESULTADO DÍA 2:
+✓ Frontend ejecutándose en :4200
+✓ Chat widget visible en landing page
+✓ Puede escribir mensajes
+✓ Recibe cotizaciones del backend
+✓ Muestra resultados en UI
+✓ Manejo de errores funcionando
+✓ End-to-end COMPLETO
+
+
+================================================================================
+VERIFICACIÓN FINAL (2 HORAS)
+================================================================================
+
+CHECKLIST DE FUNCIONALIDAD CHATBOT:
+
+Backend (http://localhost:8000)
+  [ ] GET /api/v1/chatbot/health → {"status": "healthy", "module": "chatbot"}
+  [ ] POST /api/v1/chatbot/cotizar con mensaje → Retorna cotización completa
+  [ ] Diferentes ciudades detectadas
+  [ ] Diferentes tipos de carga calculados
+  [ ] Precios varían según peso
+  [ ] Respuestas guardadas en BD
+
+Frontend (http://localhost:4200)
+  [ ] Landing page carga sin errores
+  [ ] Chat widget visible
+  [ ] Puede escribir mensajes
+  [ ] Envía y recibe respuestas
+  [ ] Muestra cotizaciones formateadas
+  [ ] Maneja errores gracefully
+  [ ] Async pipe con state$ funciona
+
+Integración
+  [ ] Frontend → Backend comunicación OK
+  [ ] CORS no da problemas
+  [ ] Bearer tokens si aplica (aunque público)
+  [ ] Headers Content-Type correctos
+
+Performance
+  [ ] Respuesta en < 500ms
+  [ ] No congela UI mientras procesa
+  [ ] Spinner muestra estado
+
+
+DEMO FINAL:
+──────────
+Abrir navegador en http://localhost:4200
+Escribir en chat: "Quiero cotizar 500 kilogramos desde La Paz a Santa Cruz"
+Resultado esperado:
+  "Cotización: [PRECIO] Bs
+   De: La Paz → A: Santa Cruz
+   Peso: 500 kg
+   Tipo: General
+   Fecha: [TIMESTAMP]"
+
+✓ SI TODO FUNCIONA → ÉXITO 100%
+
+
+================================================================================
+NOTAS IMPORTANTES
+================================================================================
+
+1. MANTENER VENTANAS SEPARADAS:
+   - Terminal 1: Backend (Uvicorn)
+   - Terminal 2: Frontend (npm start)
+   - Terminal 3: Pruebas/Testing
+
+2. PUERTOS CRÍTICOS:
+   - Backend: 8000 (NO CAMBIAR, frontend apunta aquí)
+   - Frontend: 4200 (estándar Angular)
+   - Si hay conflicto, usar: netstat -ano
+
+3. BASE DE DATOS:
+   - Seed data se crea automáticamente en startup
+   - Si no ve zonas/tarifas, ejecutar seed manualmente
+   - SQLite file en: backend/gestion_transporte.db
+
+4. LOGS ÚTILES:
+   - Backend: Ver consola uvicorn (errores, SQL queries)
+   - Frontend: F12 en navegador (Network, Console)
+   - Network tab: Ver request/response JSON
+
+5. SI ALGO NO FUNCIONA:
+   [ ] Restartear backend (Ctrl+C, volver a ejecutar)
+   [ ] Limpiar caché: Ctrl+Shift+Delete en navegador
+   [ ] Revisar logs en consola
+   [ ] Verificar puertos con: netstat -ano | findstr :<puerto>
+
+
+================================================================================
+ARCHIVOS CLAVE A REVISAR
+================================================================================
+
+BACKEND:
+  backend/app/main.py                              ← Startup/seed
+  backend/app/presentation/chatbot/router.py       ← Endpoints
+  backend/app/application/chatbot/use_cases.py     ← Lógica
+  backend/app/infrastructure/chatbot/nlp/spacy_service.py  ← NLP
+  backend/app/domain/chatbot/entities.py           ← Modelos BD
+
+FRONTEND:
+  Front-End/src/app/core/services/chatbot.service.ts         ← HTTP
+  Front-End/src/app/core/services/chatbot-state.service.ts   ← Estado
+  Front-End/src/app/features/chatbot/chatbot.component.ts    ← Componente
+  Front-End/src/environments/environment.ts                   ← Config
+
+DATABASE:
+  backend/gestion_transporte.db  ← Archivo SQLite (auto-creado)
+
+
+================================================================================
+COMANDOS RÁPIDOS
+================================================================================
+
+BACKEND:
+  cd "d:/Elvis-SecretProyect/Global/Global-/backend"
+  venv\Scripts\activate
+  uvicorn app.main:app --port 8000 --reload
+
+FRONTEND:
+  cd "d:/Elvis-SecretProyect/Global/Global-/Front-End"
+  npm start
+
+TEST CHATBOT:
+  curl -X POST http://localhost:8000/api/v1/chatbot/cotizar \
+    -H "Content-Type: application/json" \
+    -d "{\"mensaje_texto\":\"Necesito 500kg desde Santa Cruz a La Paz\"}"
+
+HEALTH CHECK:
+  curl http://localhost:8000/api/v1/chatbot/health
+
+
+================================================================================
+MÉTRICAS DE ÉXITO
+================================================================================
+
+Después de 48 horas:
+  ✓ GET /chatbot/health → 200 OK
+  ✓ POST /chatbot/cotizar → 200 OK con respuesta completa
+  ✓ Landing page carga en http://localhost:4200
+  ✓ Chat widget funcional
+  ✓ Cotizaciones calculan correctamente
+  ✓ Precios varían según entrada
+  ✓ Errores se manejan gracefully
+  ✓ Base de datos persiste solicitudes
+  ✓ End-to-end desde landing page funciona
+
+PUNTUACIÓN CHATBOT: 100/100 ✓ FUNCIONAL
+
+
+================================================================================
+
+COMIENZA AHORA CON HORA 0-1 DEL DÍA 1
+
+¿PROBLEMAS? Contacta al Lead Tech, pero intenta resolver lo máximo posible
+primero revisando archivos clave listados arriba.
+
+================================================================================

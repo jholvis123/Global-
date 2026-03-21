@@ -1,0 +1,190 @@
+<div class="page-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="page-header__content">
+      <h1 class="page-header__title">Liquidaciones</h1>
+      <p class="page-header__subtitle">Gestión de liquidaciones de viajes y pagos a choferes</p>
+    </div>
+    <div class="page-header__actions">
+      <button mat-stroked-button [matMenuTriggerFor]="exportMenu">
+        <mat-icon>download</mat-icon>
+        Exportar
+      </button>
+      <mat-menu #exportMenu="matMenu">
+        <button mat-menu-item (click)="exportToExcel()">
+          <mat-icon>table_chart</mat-icon>
+          <span>Exportar Excel</span>
+        </button>
+        <button mat-menu-item (click)="exportToPDF()">
+          <mat-icon>picture_as_pdf</mat-icon>
+          <span>Exportar PDF</span>
+        </button>
+      </mat-menu>
+      <button mat-flat-button color="primary" routerLink="nuevo">
+        <mat-icon>add</mat-icon>
+        Nueva Liquidación
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-card__icon stat-card__icon--primary">
+        <mat-icon>receipt_long</mat-icon>
+      </div>
+      <div class="stat-card__content">
+        <span class="stat-card__value">{{ stats.total }}</span>
+        <span class="stat-card__label">Total Liquidaciones</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-card__icon stat-card__icon--warning">
+        <mat-icon>pending_actions</mat-icon>
+      </div>
+      <div class="stat-card__content">
+        <span class="stat-card__value">{{ stats.pendientes }}</span>
+        <span class="stat-card__label">Pendientes</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-card__icon stat-card__icon--success">
+        <mat-icon>paid</mat-icon>
+      </div>
+      <div class="stat-card__content">
+        <span class="stat-card__value">{{ stats.pagadas }}</span>
+        <span class="stat-card__label">Pagadas</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-card__icon stat-card__icon--info">
+        <mat-icon>account_balance</mat-icon>
+      </div>
+      <div class="stat-card__content">
+        <span class="stat-card__value">Bs. {{ stats.montoTotal | number:'1.0-0' }}</span>
+        <span class="stat-card__label">Monto Pagado</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-card">
+    <mat-form-field appearance="outline">
+      <mat-label>Estado</mat-label>
+      <mat-select [(ngModel)]="selectedStatus" (selectionChange)="filterByStatus()">
+        <mat-option value="">Todos</mat-option>
+        <mat-option value="PENDIENTE">Pendiente</mat-option>
+        <mat-option value="PROCESADA">Procesada</mat-option>
+        <mat-option value="PAGADA">Pagada</mat-option>
+        <mat-option value="ANULADA">Anulada</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <!-- Table -->
+  <div class="table-card">
+    <div class="table-container">
+      <table mat-table [dataSource]="dataSource" matSort>
+        <!-- Código -->
+        <ng-container matColumnDef="codigo">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Código</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="codigo-badge">{{ row.codigo }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Chofer -->
+        <ng-container matColumnDef="chofer">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Chofer</th>
+          <td mat-cell *matCellDef="let row">
+            <div class="cell-with-avatar">
+              <div class="avatar">{{ getInitials(row.chofer) }}</div>
+              <span>{{ row.chofer }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Viaje -->
+        <ng-container matColumnDef="viaje">
+          <th mat-header-cell *matHeaderCellDef>Viaje</th>
+          <td mat-cell *matCellDef="let row">{{ row.viaje }}</td>
+        </ng-container>
+
+        <!-- Ingresos -->
+        <ng-container matColumnDef="ingresos">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Ingresos</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="monto monto--success">Bs. {{ row.ingresos | number:'1.0-0' }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Gastos -->
+        <ng-container matColumnDef="gastos">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Gastos</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="monto monto--danger">Bs. {{ row.gastos + row.anticipos | number:'1.0-0' }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Total -->
+        <ng-container matColumnDef="total">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Total a Pagar</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="monto monto--primary">Bs. {{ row.total | number:'1.0-0' }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Estado -->
+        <ng-container matColumnDef="estado">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Estado</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="status-badge" [ngClass]="getStatusClass(row.estado)">
+              {{ row.estado }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Acciones -->
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef>Acciones</th>
+          <td mat-cell *matCellDef="let row">
+            <button mat-icon-button [matMenuTriggerFor]="menu">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #menu="matMenu">
+              <button mat-menu-item [routerLink]="[row.id]">
+                <mat-icon>visibility</mat-icon>
+                <span>Ver Detalle</span>
+              </button>
+              <button mat-menu-item [routerLink]="[row.id, 'editar']" *ngIf="row.estado === 'PENDIENTE'">
+                <mat-icon>edit</mat-icon>
+                <span>Editar</span>
+              </button>
+              <button mat-menu-item *ngIf="row.estado === 'PROCESADA'">
+                <mat-icon>paid</mat-icon>
+                <span>Marcar como Pagada</span>
+              </button>
+              <button mat-menu-item>
+                <mat-icon>print</mat-icon>
+                <span>Imprimir</span>
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+
+      <!-- Loading -->
+      <div class="loading-shade" *ngIf="isLoading">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+    </div>
+
+    <mat-paginator [pageSizeOptions]="[10, 25, 50]" showFirstLastButtons></mat-paginator>
+  </div>
+</div>

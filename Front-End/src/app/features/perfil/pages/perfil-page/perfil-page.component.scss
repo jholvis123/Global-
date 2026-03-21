@@ -1,0 +1,383 @@
+$primary: #1e40af;
+$primary-light: #3b82f6;
+$success: #22c55e;
+$warning: #f59e0b;
+$danger: #ef4444;
+$purple: #8b5cf6;
+$dark: #0f172a;
+$gray-900: #1e293b;
+$gray-700: #334155;
+$gray-500: #64748b;
+$gray-300: #cbd5e1;
+$gray-100: #f1f5f9;
+$white: #ffffff;
+
+.page-container {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: 32px;
+
+  &__title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: $dark;
+    margin: 0 0 8px;
+  }
+
+  &__subtitle {
+    color: $gray-500;
+    margin: 0;
+  }
+}
+
+.perfil-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 32px;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Sidebar
+.perfil-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.user-card {
+  background: $white;
+  border-radius: 16px;
+  padding: 32px 24px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+
+  &__avatar {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, $primary-light, $primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    font-size: 2rem;
+    font-weight: 700;
+    color: $white;
+    box-shadow: 0 8px 25px rgba($primary, 0.3);
+  }
+
+  &__name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: $dark;
+    margin: 0 0 4px;
+  }
+
+  &__email {
+    font-size: 0.875rem;
+    color: $gray-500;
+    margin: 0 0 16px;
+  }
+
+  &__badge {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+
+    &.badge--admin {
+      background: rgba($danger, 0.1);
+      color: $danger;
+    }
+
+    &.badge--operator {
+      background: rgba($primary, 0.1);
+      color: $primary;
+    }
+
+    &.badge--accountant {
+      background: rgba($success, 0.1);
+      color: $success;
+    }
+
+    &.badge--default {
+      background: rgba($gray-500, 0.1);
+      color: $gray-500;
+    }
+  }
+
+  &__stats {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid $gray-100;
+
+    .stat {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+
+      &__value {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: $dark;
+      }
+
+      &__label {
+        font-size: 0.75rem;
+        color: $gray-500;
+      }
+    }
+  }
+}
+
+.quick-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .action-btn {
+    justify-content: flex-start;
+    gap: 8px;
+    padding: 12px 16px;
+    border-radius: 10px;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
+// Content
+.perfil-content {
+  background: $white;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+
+  ::ng-deep .mat-mdc-tab-header {
+    background: $gray-100;
+    border-bottom: 1px solid $gray-300;
+  }
+
+  ::ng-deep .mat-mdc-tab-labels {
+    gap: 8px;
+    padding: 8px;
+  }
+
+  ::ng-deep .mdc-tab {
+    border-radius: 8px;
+    min-width: auto;
+    padding: 0 20px;
+    gap: 8px;
+
+    &--active {
+      background: $white;
+    }
+  }
+
+  ::ng-deep .mdc-tab__text-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+}
+
+.tab-content {
+  padding: 32px;
+}
+
+.form-section {
+  margin-bottom: 32px;
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: $dark;
+    margin: 0 0 24px;
+
+    mat-icon {
+      color: $primary;
+    }
+  }
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 400px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 16px;
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 24px;
+    border-radius: 8px;
+  }
+}
+
+.section-divider {
+  margin: 32px 0;
+}
+
+.mt-16 {
+  margin-top: 16px;
+}
+
+// Sessions
+.sessions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.session-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: $gray-100;
+  border-radius: 10px;
+
+  &--current {
+    background: rgba($success, 0.08);
+    border: 1px solid rgba($success, 0.2);
+  }
+
+  &__icon {
+    width: 44px;
+    height: 44px;
+    background: $white;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    mat-icon {
+      color: $gray-700;
+    }
+  }
+
+  &__info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    strong {
+      font-size: 0.9375rem;
+      color: $dark;
+    }
+
+    span {
+      font-size: 0.8125rem;
+      color: $gray-500;
+    }
+  }
+
+  &__badge {
+    padding: 4px 12px;
+    background: $success;
+    color: $white;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+}
+
+// Preferences
+.preference-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0;
+  border-bottom: 1px solid $gray-100;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    strong {
+      font-size: 0.9375rem;
+      color: $dark;
+    }
+
+    span {
+      font-size: 0.8125rem;
+      color: $gray-500;
+    }
+  }
+}
+
+.theme-toggle {
+  display: flex;
+  gap: 8px;
+
+  .theme-btn {
+    border: 2px solid transparent;
+    border-radius: 10px;
+
+    &--light {
+      background: $gray-100;
+      color: $warning;
+      border-color: $primary;
+    }
+
+    &--dark {
+      background: $gray-700;
+      color: $gray-300;
+    }
+  }
+}
+
+.toggle-icon {
+  font-size: 32px !important;
+  width: 32px !important;
+  height: 32px !important;
+  color: $gray-300;
+  cursor: pointer;
+  transition: color 0.2s;
+
+  &.active {
+    color: $success;
+  }
+}

@@ -1,0 +1,42 @@
+.sidenav-container {
+  height: 100vh;
+}
+
+.sidenav {
+  width: var(--sidebar-width);
+  background: var(--bg-sidebar);
+  border-right: none !important;
+  box-shadow: 4px 0 16px rgba(0, 0, 0, 0.1);
+}
+
+mat-sidenav-content {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-body);
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  position: relative;
+}
+
+.top-loading-bar {
+  position: fixed;
+  top: var(--header-height);
+  left: 0;
+  right: 0;
+  z-index: 99;
+  height: 3px;
+}
+
+@media (max-width: 599px) {
+  .sidenav {
+    width: 280px;
+  }
+
+  .top-loading-bar {
+    top: 56px;
+  }
+}

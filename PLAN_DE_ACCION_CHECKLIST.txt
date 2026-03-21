@@ -1,0 +1,507 @@
+PLAN DE ACCION - CHECKLIST
+Sistema de Gestion de Autotransporte SRL v1.0.0
+
+Basado en: Evaluacion Tecnica Exhaustiva (83/100)
+Fecha: 16 Marzo 2026
+Estado: LISTO PARA MVP CON MEJORAS INMEDIATAS
+
+════════════════════════════════════════════════════════════════════════════════
+FASE 1: ESTA SEMANA (BLOQUEADORES + IMPACTO ALTO)
+════════════════════════════════════════════════════════════════════════════════
+
+Tiempo Total Estimado: 14-20 horas
+
+TAREA 1: Resolver Puerto 8000 Bloqueado
+────────────────────────────────────────
+Prioridad: CRITICA (bloqueador)
+Valor: Permite iniciar backend
+Tiempo: 30 min
+
+Acciones:
+  [ ] 1.1 Identificar procesos en puerto 8000
+      Comando: netstat -ano | findstr :8000
+  
+  [ ] 1.2 Matar procesos bloqueantes
+      Comando: taskkill /PID <pid> /F (repetir por cada proceso)
+  
+  [ ] 1.3 Verificar puerto 8000 libre
+      Comando: netstat -ano | findstr :8000 (no debe retornar nada)
+  
+  [ ] 1.4 Iniciar backend
+      Comando: cd backend && venv\Scripts\activate && uvicorn app.main:app --port 8000
+  
+  [ ] 1.5 Verificar logs de startup
+      Buscar: "Iniciando Sistema de Gestión de Autotransporte Pesado..."
+              "Data de chatbot ya existe, saltando seed..."
+              "Application startup complete"
+  
+  [ ] 1.6 Probar endpoint de salud
+      curl http://localhost:8000/api/v1/chatbot/health
+      Respuesta esperada: {"status": "healthy", "module": "chatbot"}
+  
+  [ ] 1.7 Probar cotización
+      curl -X POST http://localhost:8000/api/v1/chatbot/cotizar \
+        -H "Content-Type: application/json" \
+        -d '{"mensaje_texto":"Quiero 500kg desde Santa Cruz a La Paz"}'
+
+
+TAREA 2: Implementar Logging Estructurado
+──────────────────────────────────────────
+Prioridad: ALTA
+Valor: Debugging en producción
+Tiempo: 3-4 horas
+
+Actividades:
+  [ ] 2.1 Instalar dependencia
+      pip install python-json-logger
+  
+  [ ] 2.2 Crear app/core/logging_config.py
+      - import logging.config
+      - import pythonjsonlogger.jsonlogger
+      - Configurar handlers
+  
+  [ ] 2.3 Configurar en app/main.py
+      - from app.core.logging_config import setup_logging
+      - setup_logging() en startup
+  
+  [ ] 2.4 Agregar logs en endpoints críticos
+      - app/routes/chatbot.py: log en procesar_cotizacion
+      - app/routes/auth.py: log en login/logout
+      - app/routes/liquidaciones.py: log en crear_liquidacion
+  
+  [ ] 2.5 Verificar formato JSON en logs
+      Ejecutar y verificar que logs salen en JSON:
+      {
+        "timestamp": "2026-03-16T...",
+        "level": "INFO",
+        "message": "...",
+        "extra_field": "..."
+      }
+  
+  [ ] 2.6 Documentar formato de logs
+      Crear docs/LOGGING.md con ejemplos
+
+Recursos:
+  - backend/app/core/logging_config.py (crear)
+  - backend/app/main.py (modificar)
+  - backend/app/routes/*.py (modificar para agregar logs)
+
+
+TAREA 3: Implementar Paginación en GET Endpoints
+─────────────────────────────────────────────────
+Prioridad: ALTA
+Valor: Rendimiento + escalabilidad
+Tiempo: 4-5 horas
+
+Actividades:
+  [ ] 3.1 Crear DTO para respuesta paginada
+      backend/app/schemas/responses.py
+      - PaginatedResponse[T] genérico
+  
+  [ ] 3.2 Extender BaseRepository con paginate()
+      backend/app/repositories/base_repository.py
+      - def paginate(page, limit) -> dict
+  
+  [ ] 3.3 Actualizar endpoints principales
+      - [ ] GET /viajes
+      - [ ] GET /vehiculos
+      - [ ] GET /choferes
+      - [ ] GET /socios
+      - [ ] GET /clientes
+      - [ ] GET /liquidaciones
+  
+      Patrón a usar:
+      @router.get("/", response_model=PaginatedResponse[MiResponse])
+      async def listar(
+          page: int = Query(1, ge=1),
+          limit: int = Query(20, ge=10, le=100),
+          session: Session = Depends(get_db)
+      ):
+          return repo.paginate(page, limit)
+  
+  [ ] 3.4 Actualizar OpenAPI docs
+      Asegurar que page/limit aparecen en Swagger
+  
+  [ ] 3.5 Actualizar frontend
+      frontend/src/app/services/*.service.ts
+      - HttpParams con page/limit
+      - Mostrar paginador en listados
+  
+  [ ] 3.6 Testear con datos reales
+      GET /viajes?page=1&limit=20
+      Verificar latencia < 500ms
+
+Modelos Afectados:
+  - Viaje, Vehiculo, Chofer, Socio, Cliente, Liquidacion, Anticipo
+  - Mantenimiento
+
+
+TAREA 4: Escribir Tests de Integración para Chatbot
+────────────────────────────────────────────────────
+Prioridad: ALTA
+Valor: Confianza en cambios/refactorización
+Tiempo: 6-8 horas
+
+Actividades:
+  [ ] 4.1 Instalar pytest
+      pip install pytest pytest-asyncio pytest-cov
+  
+  [ ] 4.2 Crear conftest.py con fixtures
+      tests/conftest.py
+      - DB fixture (SQLite in-memory)
+      - Mock repositories
+      - Test client
+  
+  [ ] 4.3 Escribir test_chatbot_integration.py (8+ tests)
+      [ ] Test: Cotización exitosa con entrada estándar
+          Entrada: "Necesito 500kg desde Santa Cruz a La Paz"
+          Esperado: cotización con precio > 0
+      
+      [ ] Test: Detección de origen/destino incorrecto
+          Entrada: "Quiero transportar sin destino"
+          Esperado: Error validación
+      
+      [ ] Test: Tipos de carga
+          - General: sin recargo
+          - Peligrosa: recargo 50%
+          - Refrigerada: recargo 30%
+      
+      [ ] Test: Rutas no cubiertas
+          Entrada: "De ciudadA a ciudadB"
+          Esperado: Error "No cubrimos esa ruta"
+      
+      [ ] Test: Peso variable
+          - 100kg → precio bajo
+          - 1000kg → precio alto
+          - Validar proporcionalidad
+      
+      [ ] Test: Respuesta esperada
+          - Verificar estructura de CotizacionResponse
+          - Campos requeridos: origen, destino, precio_bs, etc.
+  
+  [ ] 4.4 Escribir test_strategies.py (8 tests)
+      [ ] CalculoCargaGeneral
+      [ ] CalculoCargaPeligrosa
+      [ ] CalculoCargaRefrigerada
+      [ ] CalculoCargaFragil
+      [ ] Factory pattern
+      [ ] Edge cases (peso 0, negativo, muy alto)
+  
+  [ ] 4.5 Escribir test_repositories.py (8 tests)
+      [ ] BaseRepository.create()
+      [ ] BaseRepository.read()
+      [ ] BaseRepository.update()
+      [ ] BaseRepository.delete()
+      [ ] TarifaRepository.buscar_tarifa()
+      [ ] UsuarioRepository.authenticate()
+  
+  [ ] 4.6 Ejecutar tests con cobertura
+      pytest tests/ --cov=app --cov-report=html
+      Target: 70% cobertura
+  
+  [ ] 4.7 Documentar en docs/TESTING.md
+      - Cómo ejecutar tests
+      - Estructura de tests
+      - Convenciones
+
+Archivos a Crear:
+  - tests/conftest.py
+  - tests/test_chatbot_integration.py
+  - tests/test_strategies.py
+  - tests/test_repositories.py
+  - docs/TESTING.md
+
+
+════════════════════════════════════════════════════════════════════════════════
+FASE 2: PROXIMO SPRINT (OPTIMIZACION)
+════════════════════════════════════════════════════════════════════════════════
+
+Tiempo Total Estimado: 20-27 horas
+
+TAREA 5: Implementar Caché Redis
+────────────────────────────────
+Prioridad: MEDIA-ALTA
+Valor: -80% queries a BD
+Tiempo: 6-8 horas
+
+Before Checklist:
+  [ ] 5.1 Instalar Redis (elegir uno)
+      [ ] Windows: Descargar Redis MSI
+      [ ] Linux: sudo apt-get install redis-server
+      [ ] Docker: docker run -d -p 6379:6379 redis:latest
+      [ ] WSL2: wsl apt-get install redis-server
+  
+  [ ] 5.2 Verificar conectividad
+      redis-cli ping
+      Respuesta esperada: PONG
+  
+  [ ] 5.3 Instalar cliente Python
+      pip install redis
+
+Implementation:
+  [ ] 5.4 Crear infrastructure/cache/redis_cache.py
+      - Clase RedisCache con get/set/delete
+      - Manejo de JSON serialization
+  
+  [ ] 5.5 Integrar en TarifaRepository
+      - Agregar caché a buscar_tarifa()
+      - TTL: 1 día (86400 segundos)
+  
+  [ ] 5.6 Integrar en ZonaRepository
+      - Caché de listado de zonas
+      - TTL: 7 días
+  
+  [ ] 5.7 Agregar invalidación de caché
+      - Cuando se crea/actualiza tarifa
+      - Cuando se crea/actualiza zona
+  
+  [ ] 5.8 Monitorear con redis-cli
+      redis-cli MONITOR  # Ver operaciones
+      redis-cli INFO     # Estadísticas
+  
+  [ ] 5.9 Testear performance
+      # Sin caché: 1000 requests → 2000 queries
+      # Con caché: 1000 requests → 0 queries (después warmup)
+
+Archivos a Crear/Modificar:
+  - backend/app/infrastructure/cache/redis_cache.py (crear)
+  - backend/app/infrastructure/chatbot/repository.py (modificar)
+  - backend/requirements.txt (agregar redis)
+
+
+TAREA 6: Mejorar NLP (Mejor que Regex)
+──────────────────────────────────────
+Prioridad: MEDIA
+Valor: Mejor precisión en extracción
+Tiempo: 6-8 horas
+
+Option A: Mejorar Regex (3-4 horas)
+  [ ] 6.1 Patrones más robustos
+  [ ] 6.2 Normalización de entrada
+  [ ] 6.3 Manejo de variaciones de ciudades
+
+Option B: Implementar spaCy (6-8 horas) - RECOMENDADO
+  [ ] 6.4 Instalar spaCy
+      pip install spacy
+      python -m spacy download es_core_news_md
+  
+  [ ] 6.5 Crear infrastructure/chatbot/nlp/spacy_service_v2.py
+      - Usar named entity recognition (NER)
+      - Identificar GPE (geografía)
+      - Identificar QUANTITY (peso)
+  
+  [ ] 6.6 Migrar en application/chatbot/use_cases.py
+      - De SpacyServicioPLN a SpacyServicio V2
+  
+  [ ] 6.7 Testear con casos variados
+      Casos de prueba:
+      - "Necesito llevar 500kg desde La Paz a Santa Cruz"
+      - "De santa cruz para la paz, 5 toneladas"
+      - "500 kilogramos La Paz → Santa Cruz"
+      - "5 cajas desde Santa Cruz, destino La Paz"
+
+Alternativa C: Transformers (9-10 horas) - Más robusto pero lento
+  [ ] 6.8 pip install torch transformers
+  [ ] 6.9 Usar xlm-roberta-base para NER multiidioma
+  [ ] 6.10 Inferencia en GPU (opcional)
+
+
+TAREA 7: Implementar Rate Limiting
+──────────────────────────────────
+Prioridad: MEDIA
+Valor: Protección contra abuse/DOS
+Tiempo: 3 horas
+
+  [ ] 7.1 Instalar slowapi
+      pip install slowapi
+  
+  [ ] 7.2 Configurar en app/main.py
+      - Importar Limiter
+      - Configurar exception handler para 429
+  
+  [ ] 7.3 Aplicar a endpoints públicos
+      @limiter.limit("10/minute")  # GET /chatbot/cotizar
+      @limiter.limit("5/minute")   # POST /auth/login
+      @limiter.limit("3/minute")   # POST /auth/register
+  
+  [ ] 7.4 Agregar Retry-After header
+      Respuesta 429 con Retry-After
+  
+  [ ] 7.5 Documentar en docs/RATE_LIMITING.md
+      - Límites por endpoint
+      - Cómo contabiliza (por IP)
+      - Cómo aumentar límites
+
+Archivos a Modificar:
+  - backend/app/main.py (agregar limiter)
+  - backend/app/routes/chatbot.py (agregar @limiter.limit)
+  - backend/app/routes/auth.py (agregar @limiter.limit)
+  - backend/requirements.txt (agregar slowapi)
+
+
+TAREA 8: Índices de Base de Datos
+─────────────────────────────────
+Prioridad: BAJA-MEDIA
+Valor: Mejor rendimiento en búsquedas
+Tiempo: 2-3 horas
+
+  [ ] 8.1 Analizar queries lentas
+      - Rubrica: rutas frecuentes (Tarifa)
+      - Búsquedas de usuario por email
+      - Búsquedas de viaje por estado
+  
+  [ ] 8.2 Crear índices en SQLAlchemy
+      En backend/app/models/:
+      
+      [ ] tarifa.py
+          - Index en (zona_origen_id, zona_destino_id)
+      
+      [ ] viaje.py
+          - Index en (estado, fecha_salida)
+      
+      [ ] usuario.py
+          - Index en email
+      
+      [ ] Otros modelos según necesidad
+  
+  [ ] 8.3 Ejecutar migrations
+      alembic revision --autogenerate -m "Add performance indexes"
+      alembic upgrade head
+  
+  [ ] 8.4 Verificar con EXPLAIN
+      EXPLAIN ANALYZE SELECT ... FROM tarifa WHERE ...
+
+Archivos a Modificar:
+  - backend/app/models/*.py (agregar Index)
+  - alembic/versions/ (nueva migration)
+
+
+TAREA 9: Validación de Fortaleza Mejorada
+─────────────────────────────────────────
+Prioridad: BAJA
+Valor: Contraseñas más seguras
+Tiempo: 3-4 horas
+
+  [ ] 9.1 Mejorar regex de validación
+      Requisitos actuales:
+      - Mín 8 caracteres
+      - Mayúscula
+      - Minúscula
+      - Número
+      - Caracter especial
+      
+      [ ] Agregar: verificar palabras comunes (password123)
+      [ ] Agregar: verificar secuencias (abc123)
+      [ ] Usar librería: zxcvbn-python
+  
+  [ ] 9.2 Implementar en app/core/security.py
+      pip install zxcvbn-python
+      
+      from zxcvbn import zxcvbn
+      
+      def validate_password_strength(password):
+          result = zxcvbn(password)
+          if result['score'] < 3:  # Escala 0-4
+              raise ValueError("Contraseña débil")
+  
+  [ ] 9.3 Actualizar frontend
+      Mostrar indicador visual de fortaleza en formulario
+  
+  [ ] 9.4 Testear casos
+      - Contraseña muy débil
+      - Contraseña aceptable
+      - Contraseña fuerte
+
+
+
+════════════════════════════════════════════════════════════════════════════════
+FASE 3: PRODUCCION (SPRINT 3+)
+════════════════════════════════════════════════════════════════════════════════
+
+Tiempo Total Estimado: 40-49 horas
+
+TAREA 10: Implementar 2FA
+────────────────────────
+Prioridad: MEDIA
+Tiempo: 10-12 horas
+
+TAREA 11: Migración a PostgreSQL
+────────────────────────────────
+Prioridad: ALTA
+Tiempo: 8-12 horas
+
+TAREA 12: Dockerización Completa
+────────────────────────────────
+Prioridad: ALTA
+Tiempo: 8-10 horas
+
+TAREA 13: CI/CD (GitHub Actions)
+────────────────────────────────
+Prioridad: MEDIA
+Tiempo: 8-10 horas
+
+TAREA 14: Documentación Swagger Completa
+────────────────────────────────────────
+Prioridad: BAJA
+Tiempo: 6 horas
+
+
+════════════════════════════════════════════════════════════════════════════════
+VALIDACION Y TESTING
+════════════════════════════════════════════════════════════════════════════════
+
+Después de FASE 1, validar:
+
+[ ] Verificar que puerto 8000 está libre y backend inicia
+[ ] Verificar logs en JSON en consola
+[ ] Hacer GET /viajes?page=1&limit=20 y ver paginación
+[ ] Ejecutar pytest tests/ y ver 70% cobertura
+[ ] Probar chatbot en landing page
+
+Después de FASE 2, validar:
+
+[ ] Redis conectado y funcionando
+[ ] Caché de tarifas optimizado (-80% queries)
+[ ] spaCy/NLP mejorado (95%+ precisión)
+[ ] Rate limiting en endpoints públicos
+[ ] Índices de BD optimizados
+
+
+════════════════════════════════════════════════════════════════════════════════
+METRICAS DE EXITO
+════════════════════════════════════════════════════════════════════════════════
+
+Después de FASE 1:
+  - Backend inicia sin errores
+  - Logging en JSON estructurado
+  - Paginación funcional en todas las listas
+  - 70% test coverage
+  - Puntuación esperada: 87/100
+
+Después de FASE 2:
+  - Cache Redis operativo
+  - NLP con precisión 95%+
+  - Rate limiting activo
+  - Índices optimizados
+  - Puntuación esperada: 90/100
+
+Después de FASE 3:
+  - 2FA implementado
+  - PostgreSQL en producción
+  - Docker funcional
+  - CI/CD automatizado
+  - Puntuación esperada: 95+/100
+
+
+════════════════════════════════════════════════════════════════════════════════
+
+NOTAS:
+- Tiempos estimados pueden variar según experiencia
+- Ejecutar tareas de FASE 1 esta semana es crítico
+- FASE 2 puede paralelizarse (tareas independientes)
+- FASE 3 requiere coordinación de producción
+
+Seguimiento:
+- Actualizar checklist diariamente
+- Reportar bloqueos inmediatamente
+- Revisar código en PRs antes de merge

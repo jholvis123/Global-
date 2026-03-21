@@ -1,0 +1,155 @@
+<!-- src/app/features/chatbot/chatbot.component.html -->
+<div class="chatbot-container">
+  <mat-card class="chatbot-card">
+    <!-- Header -->
+    <mat-card-header class="chat-header">
+      <div class="header-left">
+        <div class="bot-avatar">
+          <mat-icon>local_shipping</mat-icon>
+        </div>
+        <div class="header-info">
+          <mat-card-title>Asesor Logístico GLOBAL R.L.</mat-card-title>
+          <mat-card-subtitle>
+            <span class="status-dot"></span>
+            {{ (state$ | async)?.loading ? 'Escribiendo...' : 'En línea' }}
+          </mat-card-subtitle>
+        </div>
+      </div>
+      <button mat-icon-button (click)="resetChat()" matTooltip="Nuevo chat">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </mat-card-header>
+
+    <mat-card-content class="chat-content">
+      <!-- Zona de mensajes -->
+      <div class="mensajes-container" #mensajesContainer>
+        <!-- Mensaje de bienvenida -->
+        <div *ngIf="(state$ | async)?.mensajes?.length === 0" class="welcome-message">
+          <div class="welcome-icon">
+            <mat-icon>local_shipping</mat-icon>
+          </div>
+          <h3>¡Bienvenido a GLOBAL R.L.!</h3>
+          <p>Soy tu asesor logístico virtual. Puedo ayudarte con:</p>
+          <div class="sugerencias">
+            <button mat-stroked-button class="sugerencia-chip" (click)="enviarSugerencia('¿Qué servicios de transporte ofrecen?')">
+              <mat-icon>help_outline</mat-icon>
+              ¿Qué servicios ofrecen?
+            </button>
+            <button mat-stroked-button class="sugerencia-chip" (click)="enviarSugerencia('Necesito transportar 500 toneladas desde La Paz a Santa Cruz')">
+              <mat-icon>request_quote</mat-icon>
+              Cotizar transporte
+            </button>
+            <button mat-stroked-button class="sugerencia-chip" (click)="enviarSugerencia('¿Qué tipos de carga manejan?')">
+              <mat-icon>inventory_2</mat-icon>
+              Tipos de carga
+            </button>
+            <button mat-stroked-button class="sugerencia-chip" (click)="enviarSugerencia('¿Cuáles son las rutas disponibles?')">
+              <mat-icon>map</mat-icon>
+              Rutas disponibles
+            </button>
+          </div>
+        </div>
+
+        <!-- Lista de mensajes -->
+        <div *ngIf="state$ | async as state">
+          <div *ngFor="let msg of state.mensajes" 
+               class="mensaje" 
+               [ngClass]="{'mensaje-usuario': msg.tipo === 'usuario', 'mensaje-bot': msg.tipo === 'bot'}">
+            
+            <!-- Avatar del bot -->
+            <div *ngIf="msg.tipo === 'bot'" class="msg-avatar bot-avatar-small">
+              <mat-icon>local_shipping</mat-icon>
+            </div>
+
+            <div class="msg-burbuja" [ngClass]="{'burbuja-usuario': msg.tipo === 'usuario', 'burbuja-bot': msg.tipo === 'bot'}">
+              <p class="msg-texto">{{ msg.contenido }}</p>
+              
+              <!-- Tarjeta de cotización dentro del mensaje -->
+              <div *ngIf="msg.cotizacion_avanzada" class="cotizacion-inline">
+                <div class="cotizacion-mini-header">
+                  <mat-icon>receipt_long</mat-icon>
+                  <strong>Cotización Generada</strong>
+                </div>
+                <div class="cotizacion-mini-body">
+                  <div class="cotizacion-dato">
+                    <span class="dato-label">Ruta</span>
+                    <span class="dato-valor">{{ msg.cotizacion_avanzada.ruta.origen }} → {{ msg.cotizacion_avanzada.ruta.destino }}</span>
+                  </div>
+                  <div class="cotizacion-dato">
+                    <span class="dato-label">Carga</span>
+                    <span class="dato-valor">{{ msg.cotizacion_avanzada.carga_toneladas | number:'1.0-0' }} ton ({{ msg.cotizacion_avanzada.tipo_carga }})</span>
+                  </div>
+                  <div class="cotizacion-dato">
+                    <span class="dato-label">Distancia</span>
+                    <span class="dato-valor">{{ msg.cotizacion_avanzada.ruta.distancia_km }} km</span>
+                  </div>
+                  <mat-divider></mat-divider>
+                  <div class="cotizacion-precios">
+                    <div class="precio-escenario" *ngFor="let escenario of getEscenariosList(msg.cotizacion_avanzada)">
+                      <span class="escenario-nombre" [class.recomendado]="escenario.nombre === 'Promedio'">
+                        {{ escenario.nombre }}
+                        <small *ngIf="escenario.nombre === 'Promedio'" class="badge-rec">✓</small>
+                      </span>
+                      <span class="escenario-precio">Bs. {{ escenario.precio | number:'1.2-2' }}</span>
+                      <span class="escenario-camiones">{{ escenario.camiones }} camiones</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <span class="msg-hora">{{ msg.timestamp | date:'HH:mm' }}</span>
+            </div>
+
+            <!-- Avatar del usuario -->
+            <div *ngIf="msg.tipo === 'usuario'" class="msg-avatar user-avatar-small">
+              <mat-icon>person</mat-icon>
+            </div>
+          </div>
+
+          <!-- Indicador de escritura -->
+          <div *ngIf="state.loading" class="mensaje mensaje-bot">
+            <div class="msg-avatar bot-avatar-small">
+              <mat-icon>local_shipping</mat-icon>
+            </div>
+            <div class="msg-burbuja burbuja-bot typing-indicator">
+              <div class="typing-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Error -->
+      <div *ngIf="(state$ | async)?.error as error" class="error-banner">
+        <mat-icon>error_outline</mat-icon>
+        <span>{{ error }}</span>
+        <button mat-icon-button (click)="clearError()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </mat-card-content>
+
+    <!-- Input de mensaje -->
+    <mat-card-actions class="chat-input-area">
+      <form [formGroup]="chatbotForm" (ngSubmit)="onSubmit()" class="input-form">
+        <mat-form-field appearance="outline" class="input-field">
+          <input matInput
+                 formControlName="mensaje"
+                 placeholder="Escribe tu mensaje..."
+                 (keydown.enter)="onSubmit(); $event.preventDefault()"
+                 autocomplete="off">
+        </mat-form-field>
+        <button mat-fab 
+                color="primary" 
+                type="submit" 
+                [disabled]="chatbotForm.invalid || (state$ | async)?.loading"
+                class="send-button">
+          <mat-icon>send</mat-icon>
+        </button>
+      </form>
+    </mat-card-actions>
+  </mat-card>
+</div>
