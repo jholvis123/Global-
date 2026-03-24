@@ -4,7 +4,7 @@
     <div class="navbar__container">
       <div class="navbar__brand" (click)="scrollToSection('hero')">
         <mat-icon>fire_truck</mat-icon>
-        <span>GLOBAL <strong>R.L</strong></span>
+        <span>GLOBAL<strong>R.L</strong></span>
       </div>
       
       <div class="navbar__links">
@@ -31,12 +31,10 @@
   <!-- Hero Section -->
   <section id="hero" class="hero">
     <div class="hero__background">
-      <div class="hero__shapes">
-        <div class="shape shape--1"></div>
-        <div class="shape shape--2"></div>
-        <div class="shape shape--3"></div>
-      </div>
-      <div class="hero__grid"></div>
+      <video class="hero__video" [autoplay]="true" [loop]="true" [muted]="true" playsinline>
+        <source src="assets/video-potada.mp4" type="video/mp4">
+      </video>
+      <div class="hero__overlay"></div>
     </div>
 
     <div class="hero__content">

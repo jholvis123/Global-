@@ -5,7 +5,7 @@ from typing import Generator
 from functools import lru_cache
 from fastapi import Depends
 
-from app.db.database import SessionLocal, get_db
+from app.infrastructure.database.database import SessionLocal, get_db
 from app.core.unit_of_work import UnitOfWork, UnitOfWorkFactory
 from app.core.deps import get_current_user, get_current_active_user, get_current_admin
 
@@ -37,19 +37,19 @@ def get_uow(factory: UnitOfWorkFactory = Depends(get_uow_factory)) -> UnitOfWork
 
 def get_viaje_service(uow: UnitOfWork = Depends(get_uow)):
     """Obtener servicio de viajes"""
-    from app.services.viaje_service import ViajeService
+    from app.application.services.viaje_service import ViajeService
     return ViajeService(uow)
 
 
 def get_liquidacion_service(uow: UnitOfWork = Depends(get_uow)):
     """Obtener servicio de liquidaciones"""
-    from app.services.viaje_service import LiquidacionService
+    from app.application.services.viaje_service import LiquidacionService
     return LiquidacionService(uow)
 
 
 def get_reporte_service(uow: UnitOfWork = Depends(get_uow)):
     """Obtener servicio de reportes"""
-    from app.services.viaje_service import ReporteService
+    from app.application.services.viaje_service import ReporteService
     return ReporteService(uow)
 
 

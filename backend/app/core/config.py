@@ -1,5 +1,5 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import field_validator, model_validator
+from pydantic import Field, field_validator, model_validator
 from typing import List, Optional
 import os
 
@@ -14,18 +14,21 @@ class Settings(BaseSettings):
     # Base de datos
     DATABASE_URL: Optional[str] = None
     DB_SERVER: str = "localhost"
+    DB_PORT: str = "5432"
     DB_NAME: str = "gestion_transporte"
     DB_USER: str = "postgres"
     DB_PASSWORD: str = "password"
+    DB_ENGINE: str = "sqlite"  # 'postgresql' or 'sqlite'
     
     @model_validator(mode="after")
     def assemble_db_connection(self) -> 'Settings':
         if self.DATABASE_URL is None:
-            # Para desarrollo local, usar SQLite con SQLAlchemy
-            if self.ENVIRONMENT == "development":
-                self.DATABASE_URL = "sqlite:///./gestion_transporte.db"
+            if self.DB_ENGINE == "postgresql" or self.ENVIRONMENT != "development":
+                # Forzar PostgreSQL si se requiere o si no es desarrollo e.g. producción
+                self.DATABASE_URL = f"postgresql://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_SERVER}:{self.DB_PORT}/{self.DB_NAME}"
             else:
-                self.DATABASE_URL = f"postgresql://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_SERVER}/{self.DB_NAME}"
+                # Por defecto SQLite en desarrollo
+                self.DATABASE_URL = "sqlite:///./gestion_transporte.db"
         return self
     
     # JWT
@@ -56,10 +59,21 @@ class Settings(BaseSettings):
     UPLOAD_DIR: str = "./uploads"
     MAX_FILE_SIZE: int = 10485760  # 10MB
     
+    # Seguridad
+    ALLOWED_HOSTS: List[str] = ["*.transporte.bo", "localhost", "127.0.0.1"]
+    
     # OpenAI
     OPENAI_API_KEY: str = ""
     OPENAI_MODEL: str = "gpt-4o-mini"
+    TIPO_CAMBIO_USD_BOB: float = 6.69
     
+    @field_validator("OPENAI_API_KEY", mode="before")
+    @classmethod
+    def clean_openai_key(cls, v):
+        if isinstance(v, str):
+            return v.strip().replace('"', '').replace("'", "")
+        return v
+
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=True)
 
 

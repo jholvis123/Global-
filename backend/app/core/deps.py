@@ -2,10 +2,10 @@ from typing import Generator, Optional
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
-from app.db.database import get_db
+from app.infrastructure.database.database import get_db
 from app.core.security import verify_token
-from app.models import Usuario
-from app.repositories.usuario_repository import UsuarioRepository
+from app.domain.entities import Usuario
+from app.infrastructure.repositories.usuario_repository import UsuarioRepository
 
 
 # Esquema de seguridad Bearer

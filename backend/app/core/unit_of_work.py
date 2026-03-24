@@ -6,15 +6,15 @@ from typing import Callable
 from sqlalchemy.orm import Session
 from contextlib import contextmanager
 
-from app.repositories.viaje_repository import ViajeRepository
-from app.repositories.socio_repository import SocioRepository
-from app.repositories.usuario_repository import UsuarioRepository
-from app.repositories.vehiculo_repository import VehiculoRepository
-from app.repositories.chofer_repository import ChoferRepository
-from app.repositories.cliente_repository import ClienteRepository
-from app.repositories.liquidacion_repository import LiquidacionRepository
-from app.repositories.anticipo_repository import AnticipoRepository
-from app.repositories.mantenimiento_repository import MantenimientoRepository
+from app.infrastructure.repositories.viaje_repository import ViajeRepository
+from app.infrastructure.repositories.socio_repository import SocioRepository
+from app.infrastructure.repositories.usuario_repository import UsuarioRepository
+from app.infrastructure.repositories.vehiculo_repository import VehiculoRepository
+from app.infrastructure.repositories.chofer_repository import ChoferRepository
+from app.infrastructure.repositories.cliente_repository import ClienteRepository
+from app.infrastructure.repositories.liquidacion_repository import LiquidacionRepository
+from app.infrastructure.repositories.anticipo_repository import AnticipoRepository
+from app.infrastructure.repositories.mantenimiento_repository import MantenimientoRepository
 
 
 class UnitOfWork:

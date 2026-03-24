@@ -21,7 +21,7 @@ from app.domain.exceptions import (
     DuplicateEntityException,
     InsufficientFundsException
 )
-from app.schemas.responses import ErrorResponse, ErrorDetail
+from app.api.schemas.responses import ErrorResponse, ErrorDetail
 
 
 logger = logging.getLogger(__name__)
